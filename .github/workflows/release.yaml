@@ -31,7 +31,7 @@ jobs:
         uses: dagger/dagger-for-github@31393402b06d9d3524e2bc67a14f63d1462821ab # v7.0.5
         with:
           verb: call
-          args: release --version ${{ github.ref_name }} --github-actor ${{ github.actor }} --github-token env:GITHUB_TOKEN
+          args: release --version ${{ github.ref_name }} --github-account ${{ github.repository_owner }} --github-actor ${{ github.actor }} --github-token env:GITHUB_TOKEN
           version: ${{ steps.dagger_version.outputs.version }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
