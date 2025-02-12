@@ -8,6 +8,8 @@
 helm install --generate-name --wait oci://ghcr.io/sftpgo/helm-charts/sftpgo
 ```
 
+See the Helm chart [README](sftpgo/README.md) and [values.yaml](sftpgo/values.yaml) for more information.
+
 ## Contributing
 
 TODO
