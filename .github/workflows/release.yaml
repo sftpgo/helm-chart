@@ -1,0 +1,37 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Get Dagger version
+        id: dagger_version
+        uses: sagikazarmark/dagger-version-action@v0.0.1
+
+      - name: Run pipeline
+        uses: dagger/dagger-for-github@e49f5bfe7f9a3593f38b9d7391f110d6dff48f94 # v6.8.0
+        with:
+          verb: call
+          args: release --version ${{ github.ref_name }} --github-actor ${{ github.actor }} --github-token env:GITHUB_TOKEN
+          version: ${{ steps.dagger_version.outputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
