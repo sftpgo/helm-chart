@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Get Dagger version
+        id: dagger_version
+        uses: sagikazarmark/dagger-version-action
+
+      - name: Run pipeline
+        uses: dagger/dagger-for-github@e49f5bfe7f9a3593f38b9d7391f110d6dff48f94 # v6.8.0
+        with:
+          verb: call
+          args: build
+          version: ${{ steps.dagger_version.outputs.version }}
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        k3s:
+          - latest
+          - v1.32.1-k3s1
+          - v1.31.5-k3s1
+          - v1.30.9-k3s1
+          - v1.29.13-k3s1
+          - v1.28.15-k3s1
+          - v1.27.16-k3s1
+          - v1.26.15-k3s1
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Get Dagger version
+        id: dagger_version
+        uses: sagikazarmark/dagger-version-action
+
+      - name: Run pipeline
+        uses: dagger/dagger-for-github@e49f5bfe7f9a3593f38b9d7391f110d6dff48f94 # v6.8.0
+        with:
+          verb: call
+          args: test --version ${{ matrix.k3s }}
+          version: ${{ steps.dagger_version.outputs.version }}
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Get Dagger version
+        id: dagger_version
+        uses: sagikazarmark/dagger-version-action
+
+      - name: Run pipeline
+        uses: dagger/dagger-for-github@e49f5bfe7f9a3593f38b9d7391f110d6dff48f94 # v6.8.0
+        with:
+          verb: call
+          args: lint
+          version: ${{ steps.dagger_version.outputs.version }}
