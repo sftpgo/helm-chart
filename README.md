@@ -30,6 +30,8 @@ This Helm chart was originally created by [@sagikazarmark](https://github.com/sa
 
 Maintenance under a [personal chart repository](https://github.com/sagikazarmark/helm-charts/tree/06ebf671519118f1ddabf1ba7dd7f4e2f85ea816/charts/sftpgo) has proven to be difficult, so it has been moved to this repository.
 
+See [this discussion](https://github.com/sagikazarmark/helm-charts/pull/218) for more details.
+
 ## License
 
 The project is licensed under the [MIT License](LICENSE).
