@@ -13,7 +13,7 @@ home: https://github.com/drakkan/sftpgo
 sources:
   - https://github.com/drakkan/sftpgo
   - https://github.com/sftpgo/helm-chart
-  - https://github.com/sagikazarmark/helm-charts/tree/master/charts/sftpgo
+  - https://github.com/sagikazarmark/helm-charts/tree/06ebf671519118f1ddabf1ba7dd7f4e2f85ea816/charts/sftpgo
 maintainers:
   - name: sagikazarmark
     email: mark@sagikazarmark.com
