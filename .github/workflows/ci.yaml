@@ -42,7 +42,6 @@ jobs:
           - v1.29.13-k3s1
           - v1.28.15-k3s1
           - v1.27.16-k3s1
-          - v1.26.15-k3s1
 
     steps:
       - name: Checkout repository
