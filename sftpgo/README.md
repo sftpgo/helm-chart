@@ -162,3 +162,7 @@ require at least one port.
 | volumeMounts | list | `[]` | Additional [volume mounts](https://kubernetes.io/docs/tasks/configure-pod-container/configure-volume-storage/). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) for details. |
 | volumes | list | `[]` | Additional storage [volumes](https://kubernetes.io/docs/concepts/storage/volumes/). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) for details. |
 | webdavd.enabled | bool | `false` | Enable WebDAV service. |
+
+## Attributions
+
+This Helm chart was originally created by [@sagikazarmark](https://github.com/sagikazarmark/).
