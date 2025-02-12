@@ -22,7 +22,7 @@ jobs:
         uses: sagikazarmark/dagger-version-action@v0.0.1
 
       - name: Run pipeline
-        uses: dagger/dagger-for-github@e49f5bfe7f9a3593f38b9d7391f110d6dff48f94 # v6.8.0
+        uses: dagger/dagger-for-github@31393402b06d9d3524e2bc67a14f63d1462821ab # v7.0.5
         with:
           verb: call
           args: build
@@ -52,7 +52,7 @@ jobs:
         uses: sagikazarmark/dagger-version-action@v0.0.1
 
       - name: Run pipeline
-        uses: dagger/dagger-for-github@e49f5bfe7f9a3593f38b9d7391f110d6dff48f94 # v6.8.0
+        uses: dagger/dagger-for-github@31393402b06d9d3524e2bc67a14f63d1462821ab # v7.0.5
         with:
           verb: call
           args: test --version ${{ matrix.k3s }}
@@ -71,7 +71,7 @@ jobs:
         uses: sagikazarmark/dagger-version-action@v0.0.1
 
       - name: Run pipeline
-        uses: dagger/dagger-for-github@e49f5bfe7f9a3593f38b9d7391f110d6dff48f94 # v6.8.0
+        uses: dagger/dagger-for-github@31393402b06d9d3524e2bc67a14f63d1462821ab # v7.0.5
         with:
           verb: call
           args: lint
