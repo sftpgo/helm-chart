@@ -177,6 +177,11 @@ func (m *Sftpgo) Release(
 	return nil
 }
 
+// Generate the Helm chart documentation.
+func (m *Sftpgo) Docs() *dagger.File {
+	return m.chart().Directory().File("README.md")
+}
+
 func (m *Sftpgo) chart() *dagger.HelmChart {
 	chart := m.Source.Directory("sftpgo")
 

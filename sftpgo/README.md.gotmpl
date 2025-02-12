@@ -1,4 +1,17 @@
-{{ template "chart.baseHead" . }}
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+## TL;DR;
+
+```bash
+helm install --generate-name --wait oci://ghcr.io/sftpgo/helm-charts/sftpgo
+```
 
 ## Configuration
 
