@@ -53,7 +53,7 @@ func (m *Sftpgo) build(
 	version string,
 ) *dagger.HelmPackage {
 	return m.chart().Package(dagger.HelmChartPackageOpts{
-		Version: version,
+		Version: strings.TrimPrefix(version, "v"),
 	})
 }
 
