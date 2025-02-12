@@ -16,7 +16,7 @@ TODO
 
 ## Releases
 
-Releases are automatically pushed to the [GitHub Container Registry]() on tags.
+Releases are automatically pushed to the [GitHub Container Registry](https://github.com/sftpgo/helm-chart/pkgs/container/helm-charts%2Fsftpgo) on tags.
 
 To tag a new release after merging changes to `main`, run the following:
 
