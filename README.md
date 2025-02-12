@@ -29,6 +29,7 @@ git push origin v$TAG
 ## Attributions
 
 This Helm chart was originally created by [@sagikazarmark](https://github.com/sagikazarmark/)
+
 Maintenance under a [personal chart repository](https://github.com/sagikazarmark/helm-charts/tree/06ebf671519118f1ddabf1ba7dd7f4e2f85ea816/charts/sftpgo) has proven to be difficult, so it has been moved to this repository.
 
 ## License
