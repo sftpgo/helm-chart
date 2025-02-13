@@ -47,6 +47,9 @@
                 kind
                 kubectl
                 kubernetes-helm
+                just
+                git
+                semver-tool
               ];
 
               env = {
