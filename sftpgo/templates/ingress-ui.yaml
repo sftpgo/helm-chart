@@ -1,18 +1,5 @@
 {{- if and $.Values.httpd.enabled .Values.ui.ingress.enabled -}}
-{{- $fullName := include "sftpgo.fullname" . -}}
-{{- $svcPort := .Values.service.ports.http.port -}}
-{{- if and .Values.ui.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
-  {{- if not (hasKey .Values.ui.ingress.annotations "kubernetes.io/ingress.class") }}
-  {{- $_ := set .Values.ui.ingress.annotations "kubernetes.io/ingress.class" .Values.ui.ingress.className}}
-  {{- end }}
-{{- end }}
-{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1
-{{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
-apiVersion: networking.k8s.io/v1beta1
-{{- else -}}
-apiVersion: extensions/v1beta1
-{{- end }}
 kind: Ingress
 metadata:
   name: {{ include "sftpgo.componentname" (list . "ui") }}
@@ -23,8 +10,8 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if and .Values.ui.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
-  ingressClassName: {{ .Values.ui.ingress.className }}
+  {{- with .Values.ui.ingress.className }}
+  ingressClassName: {{ . }}
   {{- end }}
   {{- if .Values.ui.ingress.tls }}
   tls:
@@ -43,19 +30,14 @@ spec:
         paths:
           {{- range .paths }}
           - path: {{ .path }}
-            {{- if and .pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
-            pathType: {{ .pathType }}
+            {{- with .pathType }}
+            pathType: {{ . }}
             {{- end }}
             backend:
-              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
               service:
-                name: {{ $fullName }}
+                name: {{ include "sftpgo.fullname" $ }}
                 port:
-                  number: {{ $svcPort }}
-              {{- else }}
-              serviceName: {{ $fullName }}
-              servicePort: {{ $svcPort }}
-              {{- end }}
+                  number: {{ $.Values.service.ports.http.port }}
           {{- end }}
     {{- end }}
 {{- end }}

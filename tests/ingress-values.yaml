@@ -1,0 +1,10 @@
+httpd:
+  enabled: true
+
+ui:
+  ingress:
+    enabled: true
+
+api:
+  ingress:
+    enabled: true
