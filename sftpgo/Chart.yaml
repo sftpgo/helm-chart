@@ -1,7 +1,7 @@
 apiVersion: v2
 type: application
 name: sftpgo
-version: 0.35.0
+version: 0.36.0
 appVersion: 2.6.5
 kubeVersion: ">=1.23.0-0"
 description: Full-featured and highly configurable SFTP, HTTP/S, FTP/S and WebDAV server.
