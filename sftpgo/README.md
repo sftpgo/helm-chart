@@ -1,10 +1,8 @@
 # sftpgo
 
-![Version: 0.0.0](https://img.shields.io/badge/Version-0.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.5.4](https://img.shields.io/badge/AppVersion-2.5.4-informational?style=flat-square)
-
 Full-featured and highly configurable SFTP, HTTP/S, FTP/S and WebDAV server.
 
-**Homepage:** <https://github.com/drakkan/sftpgo>
+**Homepage:** <https://sftpgo.com>
 
 ## TL;DR;
 
