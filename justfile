@@ -2,6 +2,10 @@
 default:
   @just --list
 
+# regenerate the readme of the chart
+docs:
+    dagger call docs contents > sftpgo/README.md
+
 # tag and release
 release bump='minor':
     #!/usr/bin/env bash
