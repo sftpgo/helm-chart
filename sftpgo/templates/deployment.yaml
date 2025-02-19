@@ -1,3 +1,4 @@
+{{- $selectorLabels := fromYaml (include "sftpgo.selectorLabels" .) -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,7 +19,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "sftpgo.selectorLabels" . | nindent 6 }}
+      {{- toYaml $selectorLabels | nindent 6 }}
   template:
     metadata:
       annotations:
@@ -27,7 +28,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "sftpgo.selectorLabels" . | nindent 8 }}
+        {{- toYaml $selectorLabels | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -163,12 +164,12 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.topologySpreadConstraints.enabled }}
+      {{- if not (.Values.topologySpreadConstraints | empty) }}
       topologySpreadConstraints:
-        - labelSelector:
-            matchLabels:
-              {{- include "sftpgo.selectorLabels" . | nindent 14 }}
-          maxSkew: {{ .Values.topologySpreadConstraints.maxSkew }}
-          topologyKey: {{ .Values.topologySpreadConstraints.topologyKey }}
-          whenUnsatisfiable: {{ .Values.topologySpreadConstraints.whenUnsatisfiable }}
+      {{- range $constraint := .Values.topologySpreadConstraints }}
+      {{- if not $constraint.labelSelector }}
+      {{- $constraint = merge $constraint (dict "labelSelector" (dict "matchLabels" $selectorLabels)) }}
+      {{- end }}
+      - {{ toYaml $constraint | indent 8 | trim }}
+      {{- end }}
       {{- end }}
