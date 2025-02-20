@@ -1,3 +1,6 @@
 topologySpreadConstraints:
-  enabled: true
-  topologyKey: kubernetes.io/hostname
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+    matchLabelKeys:
+      - pod-template-hash
