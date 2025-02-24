@@ -333,3 +333,10 @@ persistence:
       requests:
         storage: 5Gi
     storageClassName: premium-rwo
+
+monitoring:
+  # -- Add the port 10000 to the service to expose telemetry endpoints
+  enabled: true
+  serviceMonitor:
+    # -- Enable Service Monitor for Prometheus Operator
+    enabled: false
