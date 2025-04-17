@@ -73,6 +73,7 @@ spec:
       appProtocol: http
       {{- end }}
     {{- end }}
+    {{- if .Values.monitoring.enabled }}
     - name: telemetry
       port: 10000
       targetPort: telemetry
@@ -80,6 +81,7 @@ spec:
       {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.GitVersion }}
       appProtocol: http
       {{- end }}
+    {{- end }}
   selector:
     {{- include "sftpgo.selectorLabels" . | nindent 4 }}
 

@@ -1,0 +1,23 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "sftpgo.fullname" . }}
+  labels:
+    {{- include "sftpgo.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      {{- include "sftpgo.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: telemetry
+      path: /metrics
+      interval: 30s
+{{- end }}
