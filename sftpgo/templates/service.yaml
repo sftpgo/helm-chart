@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "sftpgo.labels" . | nindent 4 }}
     {{- if .Values.service.labels }}
-    {{ toYaml .Values.service.labels | indent 4 }}
+    {{ toYaml .Values.service.labels | nindent 4 }}
     {{- end }}
   {{- with .Values.service.annotations }}
   annotations:
