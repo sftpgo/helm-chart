@@ -4,6 +4,9 @@ metadata:
   name: {{ include "sftpgo.fullname" . }}
   labels:
     {{- include "sftpgo.labels" . | nindent 4 }}
+    {{- if .Values.deploymentLabels }}
+    {{ toYaml .Values.deploymentLabels | nindent 4 }}
+    {{- end }}
   {{- with .Values.deploymentAnnotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
