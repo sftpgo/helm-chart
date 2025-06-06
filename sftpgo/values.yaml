@@ -341,4 +341,4 @@ persistence:
     resources:
       requests:
         storage: 5Gi
-    storageClassName: premium-rwo
+    storageClassName: ""
