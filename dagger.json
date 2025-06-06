@@ -18,7 +18,7 @@
     {
       "name": "k3s",
       "source": "github.com/marcosnils/daggerverse/k3s",
-      "pin": "a5ffc7e6f34c3871ac1d1acad6b3be5f85dd308b"
+      "pin": "c07646d1bf7f6079dab47ba152c767e062aa0f58"
     },
     {
       "name": "registry",
