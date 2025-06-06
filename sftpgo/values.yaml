@@ -118,6 +118,9 @@ service:
   # -- Annotations to be added to the service.
   annotations: {}
 
+  # -- labels to be added to the service.
+  labels: {}
+
   # -- Kubernetes [service type](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types).
   type: ClusterIP
 
