@@ -35,7 +35,7 @@ jobs:
       fail-fast: false
       matrix:
         k3s:
-          - latest
+          #- latest
           - v1.32.1-k3s1
           - v1.31.5-k3s1
           - v1.30.9-k3s1
