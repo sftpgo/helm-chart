@@ -164,6 +164,13 @@ service:
       # -- (int) FTP node port (when applicable).
       nodePort:
 
+      passiveRange:
+        # -- FTP passive range start port.
+        start: 50000
+
+        # -- FTP passive range end port.
+        end: 50020
+
     webdav:
       # -- WebDAV service port.
       port: 81
