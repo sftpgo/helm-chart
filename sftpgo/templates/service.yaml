@@ -51,6 +51,15 @@ spec:
       {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.GitVersion }}
       appProtocol: ftp
       {{- end }}
+    {{- $start := int .Values.service.ports.ftp.passiveRange.start }}
+    {{- $end := int (add .Values.service.ports.ftp.passiveRange.end 1) }}
+    {{- range $port := untilStep $start $end 1 }}
+    - name: ftp-passive-{{ $port }}
+      port: {{ $port }}
+      targetPort: {{ $port }}
+      protocol: TCP
+      appProtocol: ftp
+    {{- end }}
     {{- end }}
     {{- if .Values.webdavd.enabled }}
     - name: webdav
