@@ -59,27 +59,22 @@ spec:
           env:
             {{- if .Values.sftpd.enabled }}
             - name: SFTPGO_SFTPD__BINDINGS__0__PORT
-              value: "2022"
-            - name: SFTPGO_SFTPD__BINDINGS__0__ADDRESS
-              value: "0.0.0.0"
+              value: "{{ .Values.sftpd.port}}"
+            {{- else}}
+            - name: SFTPGO_SFTPD__BINDINGS__0__PORT
+              value: "0"
             {{- end }}
             {{- if .Values.ftpd.enabled }}
             - name: SFTPGO_FTPD__BINDINGS__0__PORT
-              value: "2021"
-            - name: SFTPGO_FTPD__BINDINGS__0__ADDRESS
-              value: "0.0.0.0"
+              value: "{{ .Values.ftpd.port}}"
             {{- end }}
             {{- if .Values.webdavd.enabled }}
             - name: SFTPGO_WEBDAVD__BINDINGS__0__PORT
-              value: "8081"
-            - name: SFTPGO_WEBDAVD__BINDINGS__0__ADDRESS
-              value: "0.0.0.0"
+              value: "{{ .Values.webdavd.port}}"
             {{- end }}
             {{- if .Values.httpd.enabled }}
             - name: SFTPGO_HTTPD__BINDINGS__0__PORT
-              value: "8080"
-            - name: SFTPGO_HTTPD__BINDINGS__0__ADDRESS
-              value: "0.0.0.0"
+              value: "{{ .Values.httpd.port}}"
             {{- else }}
             - name: SFTPGO_HTTPD__BINDINGS__0__PORT
               value: "0"
@@ -87,7 +82,7 @@ spec:
             - name: SFTPGO_TELEMETRY__BIND_PORT
               value: "10000"
             - name: SFTPGO_TELEMETRY__BIND_ADDRESS
-              value: "0.0.0.0"
+              value: ""
             {{- with .Values.envVars }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -102,22 +97,22 @@ spec:
           ports:
             {{- if .Values.sftpd.enabled }}
             - name: sftp
-              containerPort: 2022
+              containerPort: {{ .Values.sftpd.port}}
               protocol: TCP
             {{- end }}
             {{- if .Values.ftpd.enabled }}
             - name: ftp
-              containerPort: 2021
+              containerPort: {{ .Values.ftpd.port}}
               protocol: TCP
             {{- end }}
             {{- if .Values.webdavd.enabled }}
             - name: webdav
-              containerPort: 8081
+              containerPort: {{ .Values.webdavd.port}}
               protocol: TCP
             {{- end }}
             {{- if .Values.httpd.enabled }}
             - name: http
-              containerPort: 8080
+              containerPort: {{ .Values.httpd.port}}
               protocol: TCP
             {{- end }}
             - name: telemetry
