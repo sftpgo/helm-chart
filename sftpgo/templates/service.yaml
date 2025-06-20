@@ -23,9 +23,9 @@ spec:
   {{- with .Values.service.loadBalancerSourceRanges }}
   loadBalancerSourceRanges: {{ toYaml . | nindent 4 }}
   {{- end }}
+  {{- end }}
   {{- with .Values.service.sessionAffinity }}
   sessionAffinity: {{ . }}
-  {{- end }}
   {{- end }}
   ports:
     {{- if .Values.sftpd.enabled }}
