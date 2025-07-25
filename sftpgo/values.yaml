@@ -55,6 +55,16 @@ httpd:
   # -- Container HTTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting.
   port: 8080
 
+# -- Additional ports to expose in the deployment
+additionalPorts: {}
+  # sftp:
+  #   containerPort: 22
+  #   protocol: TCP
+  # ftps:
+  #   containerPort: 990
+  #   protocol: TCP
+
+
 # -- Application configuration.
 # See the [official documentation](https://docs.sftpgo.com/latest/config-file/).
 config: {}
