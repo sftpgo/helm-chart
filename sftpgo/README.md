@@ -25,7 +25,7 @@ Setting the `config` key in the values file is the easiest way to configure SFTP
 ```yaml
 config:
     sftpd:
-        max_auth_retries: 10
+        max_auth_tries: 10
 ```
 
 ### Custom volume mount
@@ -106,14 +106,17 @@ require at least one port.
 | autoscaling | object | Disabled by default. | Autoscaling configuration (see [values.yaml](values.yaml) for details). |
 | config | object | `{}` | Application configuration. See the [official documentation](https://docs.sftpgo.com/latest/config-file/). |
 | deploymentAnnotations | object | `{}` | Annotations to be added to deployment. |
+| deploymentLabels | object | `{}` | Labels to be added to deployment. |
 | deploymentStrategy | object | `{}` | Define the [strategy](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy) to replace old Pods by new ones during updates. |
 | env | object | `{}` | Additional environment variables passed directly to containers using a simplified key-value syntax. |
 | envFrom | list | `[]` | Additional environment variables mounted from [secrets](https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables) or [config maps](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables) for details. |
 | envVars | list | `[]` | Additional environment variables passed directly to containers. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables) for details. |
 | ftpd.enabled | bool | `false` | Enable FTP service. |
+| ftpd.port | int | `2021` | Container FTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting. |
 | fullnameOverride | string | `""` | A name to substitute for the full names of resources. |
 | hostNetwork | bool | `false` | Run pods in the host network of nodes. Warning: The use of host network is [discouraged](https://kubernetes.io/docs/concepts/configuration/overview/#services). Make sure to use it only when absolutely necessary. |
 | httpd.enabled | bool | `true` | Enable HTTP service. |
+| httpd.port | int | `8080` | Container HTTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting. |
 | image.pullPolicy | string | `"IfNotPresent"` | [Image pull policy](https://kubernetes.io/docs/concepts/containers/images/#updating-images) for updating already existing images on a node. |
 | image.repository | string | `"ghcr.io/drakkan/sftpgo"` | Name of the image repository to pull the container image from. |
 | image.tag | string | `""` | Image tag override for the default value (chart appVersion). |
@@ -122,17 +125,22 @@ require at least one port.
 | nameOverride | string | `""` | A name in place of the chart name for `app:` labels. |
 | nodeSelector | object | `{}` | [Node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) configuration. |
 | persistence.enabled | bool | `false` | Enable persistent storage for the /var/lib/sftpgo directory, saving state of the default sqlite db. |
-| persistence.pvc | object | `{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":"premium-rwo"}` | Create the pvc desired specificiation. |
+| persistence.pvc | object | `{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""}` | Create the pvc desired specificiation. |
 | podAnnotations | object | `{}` | Annotations to be added to pods. |
+| podLabels | object | `{}` | Labels to be added to pods. |
 | podSecurityContext | object | `{"fsGroup":1000}` | Pod [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context) for details. |
 | replicaCount | int | `1` | Number of replicas (pods) to launch. |
 | resources | object | No requests or limits. | Container resource [requests and limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#resources) for details. |
+| revisionHistoryLimit | int | `10` | Number of old ReplicaSets to retain to allow rollback. |
 | securityContext | object | `{}` | Container [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context-1) for details. |
 | service.annotations | object | `{}` | Annotations to be added to the service. |
 | service.externalTrafficPolicy | string | `nil` | Route external traffic to node-local or cluster-wide endoints. Useful for [preserving the client source IP](https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip). |
+| service.labels | object | `{}` | labels to be added to the service. |
 | service.loadBalancerIP | string | `nil` | Only applies when the service type is LoadBalancer. Load balancer will get created with the IP specified in this field. |
 | service.loadBalancerSourceRanges | list | `[]` | If specified (and supported by the cloud provider), traffic through the load balancer will be restricted to the specified client IPs. Valid values are IP CIDR blocks. |
 | service.ports.ftp.nodePort | int | `nil` | FTP node port (when applicable). |
+| service.ports.ftp.passiveRange.end | int | `50020` | FTP passive range end port. |
+| service.ports.ftp.passiveRange.start | int | `50000` | FTP passive range start port. |
 | service.ports.ftp.port | int | `21` | FTP service port. |
 | service.ports.http.nodePort | int | `nil` | REST API node port (when applicable). |
 | service.ports.http.port | int | `80` | REST API service port. |
@@ -147,6 +155,7 @@ require at least one port.
 | serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template. |
 | services | object | `{}` | Additional services exposing servers (SFTP, FTP, WebDAV, HTTP) individually. The schema matches the one under the `service` key. Additional services need at least one port. |
 | sftpd.enabled | bool | `true` | Enable SFTP service. |
+| sftpd.port | int | `2022` | Container SFTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting. |
 | tolerations | list | `[]` | [Tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) for node taints. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#scheduling) for details. |
 | topologySpreadConstraints.enabled | bool | `false` | Enable pod [Topology Spread Constraints](https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/). |
 | topologySpreadConstraints.maxSkew | int | `1` | Degree to which pods may be unevenly distributed. |
@@ -160,6 +169,7 @@ require at least one port.
 | volumeMounts | list | `[]` | Additional [volume mounts](https://kubernetes.io/docs/tasks/configure-pod-container/configure-volume-storage/). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) for details. |
 | volumes | list | `[]` | Additional storage [volumes](https://kubernetes.io/docs/concepts/storage/volumes/). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) for details. |
 | webdavd.enabled | bool | `false` | Enable WebDAV service. |
+| webdavd.port | int | `8081` | Container WebDAV port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting. |
 
 ## Attributions
 
