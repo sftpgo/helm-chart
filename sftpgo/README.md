@@ -124,6 +124,9 @@ require at least one port.
 | initContainers | list | `[]` | Add [init containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) to the pod. |
 | nameOverride | string | `""` | A name in place of the chart name for `app:` labels. |
 | nodeSelector | object | `{}` | [Node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) configuration. |
+| pdb.enabled | bool | `false` | Enable Pod Disruption Budget to ensure availability during voluntary disruptions. |
+| pdb.maxUnavailable | string | `nil` | Maximum number or percentage of pods that can be unavailable after the eviction. |
+| pdb.minAvailable | string | `nil` | Minimum number or percentage of pods that must be available after the eviction. |
 | persistence.enabled | bool | `false` | Enable persistent storage for the /var/lib/sftpgo directory, saving state of the default sqlite db. |
 | persistence.pvc | object | `{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""}` | Create the pvc desired specificiation. |
 | podAnnotations | object | `{}` | Annotations to be added to pods. |

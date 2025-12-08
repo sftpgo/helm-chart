@@ -352,6 +352,14 @@ topologySpreadConstraints:
   # -- How to deal with a Pod if it doesn't satisfy the spread constraint.
   whenUnsatisfiable: DoNotSchedule
 
+pdb:
+  # -- Enable Pod Disruption Budget to ensure availability during voluntary disruptions.
+  enabled: false
+  # -- Minimum number or percentage of pods that must be available after the eviction.
+  minAvailable: 
+  # -- Maximum number or percentage of pods that can be unavailable after the eviction.
+  maxUnavailable: 
+
 persistence:
   # -- Enable persistent storage for the /var/lib/sftpgo directory, saving state of the default sqlite db.
   enabled: false
