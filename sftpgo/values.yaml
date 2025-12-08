@@ -372,3 +372,7 @@ persistence:
       requests:
         storage: 5Gi
     storageClassName: ""
+
+podMonitor:
+  # -- Enable PodMonitor resource for Prometheus Operator to scrape pod metrics.
+  enabled: false
