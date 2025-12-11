@@ -338,19 +338,8 @@ affinity: {}
 # Warning: The use of host network is [discouraged](https://kubernetes.io/docs/concepts/configuration/overview/#services). Make sure to use it only when absolutely necessary.
 hostNetwork: false
 
-topologySpreadConstraints:
-  # -- Enable pod [Topology Spread Constraints](https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/).
-  enabled: false
-
-  # -- Degree to which pods may be unevenly distributed.
-  maxSkew: 1
-
-  # -- The key of node labels.
-  # See https://kubernetes.io/docs/reference/kubernetes-api/labels-annotations-taints/
-  topologyKey: topology.kubernetes.io/zone
-
-  # -- How to deal with a Pod if it doesn't satisfy the spread constraint.
-  whenUnsatisfiable: DoNotSchedule
+# -- [Topology Spread Constraints](https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/) configuration.
+topologySpreadConstraints: []
 
 persistence:
   # -- Enable persistent storage for the /var/lib/sftpgo directory, saving state of the default sqlite db.
