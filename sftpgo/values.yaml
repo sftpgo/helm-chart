@@ -99,6 +99,9 @@ serviceAccount:
   # -- Enable service account creation.
   create: true
 
+  # -- Automount API credentials for the Service Account.
+  automountServiceAccountToken: true
+
   # -- Annotations to be added to the service account.
   annotations: {}
 
