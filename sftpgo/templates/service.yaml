@@ -121,9 +121,9 @@ spec:
   {{- with $service.loadBalancerSourceRanges }}
   loadBalancerSourceRanges: {{ toYaml . | nindent 4 }}
   {{- end }}
+  {{- end }}
   {{- with $service.sessionAffinity }}
   sessionAffinity: {{ . }}
-  {{- end }}
   {{- end }}
   ports:
     {{- if and $.Values.sftpd.enabled $service.ports.sftp }}
