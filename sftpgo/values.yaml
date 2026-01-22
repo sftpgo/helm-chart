@@ -341,6 +341,12 @@ affinity: {}
 # Warning: The use of host network is [discouraged](https://kubernetes.io/docs/concepts/configuration/overview/#services). Make sure to use it only when absolutely necessary.
 hostNetwork: false
 
+# -- Duration in seconds the pod needs to terminate gracefully.
+# See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#lifecycle) for details.
+# Should be set in conjunction with SFTPGO_GRACE_TIME environment variable.
+# Expected value: number of seconds (int64).
+terminationGracePeriodSeconds: null
+
 topologySpreadConstraints:
   # -- Enable pod [Topology Spread Constraints](https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/).
   enabled: false
