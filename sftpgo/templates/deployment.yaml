@@ -45,8 +45,8 @@ spec:
       hostNetwork: {{ .Values.hostNetwork }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{- if not (quote .Values.terminationGracePeriodSeconds | empty) }}
-      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      {{- if not (quote .Values.podTerminationGracePeriodSeconds | empty) }}
+      terminationGracePeriodSeconds: {{ .Values.podTerminationGracePeriodSeconds }}
       {{- end }}
       {{- with .Values.initContainers }}
       initContainers:

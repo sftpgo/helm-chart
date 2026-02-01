@@ -130,6 +130,7 @@ require at least one port.
 | podLabels | object | `{}` | Labels to be added to pods. |
 | podPriorityClassName | string | `nil` | Pod priority class name. |
 | podSecurityContext | object | `{"fsGroup":1000}` | Pod [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context) for details. |
+| podTerminationGracePeriodSeconds | string | `nil` | Duration in seconds the pod needs to terminate gracefully. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#lifecycle) for details. Should be set in conjunction with SFTPGO_GRACE_TIME environment variable. Expected value: number of seconds (int64). |
 | replicaCount | int | `1` | Number of replicas (pods) to launch. |
 | resources | object | No requests or limits. | Container resource [requests and limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#resources) for details. |
 | revisionHistoryLimit | int | `10` | Number of old ReplicaSets to retain to allow rollback. |
