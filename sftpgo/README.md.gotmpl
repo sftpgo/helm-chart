@@ -94,6 +94,61 @@ services:
 Additional services accept the same options as the `service` option in the values file and
 require at least one port.
 
+### Gateway API (HTTPRoute and TCPRoute)
+
+The chart supports [Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/) for exposing SFTPGo services using `HTTPRoute` and `TCPRoute` resources. This is very useful when using SFTPgo in a cluster with Gateway API compatible ingress controllers like `istio` `Kong` or `Cilium`.
+
+**Prerequisites:** You must have a `Gateway` resource already configured and working in your cluster before enabling Gateway API routes in this chart to make it work.
+
+#### HTTPRoute for UI and API
+
+The chart can create `HTTPRoute` resources for both the web UI and REST API endpoints:
+
+**Example: Exposing the UI via HTTPRoute**
+
+```yaml
+gatewayApi:
+  httpRoutes:
+    ui:
+      enabled: true
+      hostnames:
+        - sftpgo.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: istio-system
+          sectionName: http
+```
+
+**Example: Exposing the API via HTTPRoute**
+
+```yaml
+gatewayApi:
+  httpRoutes:
+    api:
+      enabled: true
+      hostnames:
+        - sftpgo-api.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: istio-system
+          sectionName: http
+      pathPrefix: /api
+```
+
+#### TCPRoute for SFTP
+
+For TCP-based protocols like SFTP, you need to use `TCPRoute` instead of `HTTPRoute`:
+
+```yaml
+gatewayApi:
+  tcpRoutes:
+    sftp:
+      enabled: true
+      parentRefs:
+        - name: my-gateway
+          namespace: istio-system
+          sectionName: sftp
+```
 {{ template "chart.valuesSection" . }}
 
 ## Attributions
