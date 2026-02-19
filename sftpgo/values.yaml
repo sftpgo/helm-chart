@@ -215,6 +215,12 @@ services: {}
   #   type: LoadBalancer
   #   loadBalancerIP:
   #   loadBalancerSourceRanges: []
+  #   ports:
+  #     sftp: # Only SFTP will be exposed
+  #       port: 22
+  #       nodePort:
+  #   externalTrafficPolicy:
+  #   sessionAffinity:
 
 ui:
   ingress:
