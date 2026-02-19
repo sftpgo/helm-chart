@@ -93,6 +93,61 @@ services:
 Additional services accept the same options as the `service` option in the values file and
 require at least one port.
 
+### Gateway API (HTTPRoute and TCPRoute)
+
+The chart supports [Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/) for exposing SFTPGo services using `HTTPRoute` and `TCPRoute` resources. This is very useful when using SFTPgo in a cluster with Gateway API compatible ingress controllers like `istio` `Kong` or `Cilium`.
+
+**Prerequisites:** You must have a `Gateway` resource already configured and working in your cluster before enabling Gateway API routes in this chart to make it work.
+
+#### HTTPRoute for UI and API
+
+The chart can create `HTTPRoute` resources for both the web UI and REST API endpoints:
+
+**Example: Exposing the UI via HTTPRoute**
+
+```yaml
+gatewayApi:
+  httpRoutes:
+    ui:
+      enabled: true
+      hostnames:
+        - sftpgo.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: istio-system
+          sectionName: http
+```
+
+**Example: Exposing the API via HTTPRoute**
+
+```yaml
+gatewayApi:
+  httpRoutes:
+    api:
+      enabled: true
+      hostnames:
+        - sftpgo-api.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: istio-system
+          sectionName: http
+      pathPrefix: /api
+```
+
+#### TCPRoute for SFTP
+
+For TCP-based protocols like SFTP, you need to use `TCPRoute` instead of `HTTPRoute`:
+
+```yaml
+gatewayApi:
+  tcpRoutes:
+    sftp:
+      enabled: true
+      parentRefs:
+        - name: my-gateway
+          namespace: istio-system
+          sectionName: sftp
+```
 ## Values
 
 | Key | Type | Default | Description |
@@ -114,6 +169,21 @@ require at least one port.
 | ftpd.enabled | bool | `false` | Enable FTP service. |
 | ftpd.port | int | `2021` | Container FTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting. |
 | fullnameOverride | string | `""` | A name to substitute for the full names of resources. |
+| gatewayApi.httpRoutes.api.annotations | object | `{}` | Annotations to be added to the API HTTPRoute. |
+| gatewayApi.httpRoutes.api.enabled | bool | `false` | Enable [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) for the API. |
+| gatewayApi.httpRoutes.api.hostnames | list | `["chart-example.local"]` | Hostnames for the API HTTPRoute. |
+| gatewayApi.httpRoutes.api.labels | object | `{}` | Labels to be added to the API HTTPRoute. |
+| gatewayApi.httpRoutes.api.parentRefs | list | `[]` | ParentRefs for the API HTTPRoute. |
+| gatewayApi.httpRoutes.api.pathPrefix | string | `"/api"` | Path prefix for the API route. |
+| gatewayApi.httpRoutes.ui.annotations | object | `{}` | Annotations to be added to the UI HTTPRoute. |
+| gatewayApi.httpRoutes.ui.enabled | bool | `false` | Enable [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) for the UI. |
+| gatewayApi.httpRoutes.ui.hostnames | list | `["chart-example.local"]` | Hostnames for the UI HTTPRoute. |
+| gatewayApi.httpRoutes.ui.labels | object | `{}` | Labels to be added to the UI HTTPRoute. |
+| gatewayApi.httpRoutes.ui.parentRefs | list | `[]` | ParentRefs for the UI HTTPRoute. |
+| gatewayApi.tcpRoutes.sftp.annotations | object | `{}` | Annotations to be added to the SFTP TCPRoute. |
+| gatewayApi.tcpRoutes.sftp.enabled | bool | `false` | Enable TCPRoute for SFTP. |
+| gatewayApi.tcpRoutes.sftp.labels | object | `{}` | Labels to be added to the SFTP TCPRoute. |
+| gatewayApi.tcpRoutes.sftp.parentRefs | list | `[]` | ParentRefs for the SFTP TCPRoute. |
 | hostNetwork | bool | `false` | Run pods in the host network of nodes. Warning: The use of host network is [discouraged](https://kubernetes.io/docs/concepts/configuration/overview/#services). Make sure to use it only when absolutely necessary. |
 | httpd.enabled | bool | `true` | Enable HTTP service. |
 | httpd.port | int | `8080` | Container HTTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting. |

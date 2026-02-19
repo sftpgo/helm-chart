@@ -215,13 +215,6 @@ services: {}
   #   type: LoadBalancer
   #   loadBalancerIP:
   #   loadBalancerSourceRanges: []
-  #   ports:
-  #     sftp: # Only SFTP will be exposed
-  #       port: 22
-  #       nodePort:
-  #   externalTrafficPolicy:
-  #   sessionAffinity:
-
 
 ui:
   ingress:
@@ -376,3 +369,56 @@ persistence:
       requests:
         storage: 5Gi
     storageClassName: ""
+
+gatewayApi:
+  httpRoutes:
+    ui:
+      # -- Enable [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) for the UI.
+      enabled: false
+      # -- Annotations to be added to the UI HTTPRoute.
+      annotations: {}
+      # -- Labels to be added to the UI HTTPRoute.
+      labels: {}
+      # -- Hostnames for the UI HTTPRoute.
+      hostnames:
+        - chart-example.local
+      # -- ParentRefs for the UI HTTPRoute.
+      parentRefs: []
+      # Example:
+      # parentRefs:
+      # - group: gateway.networking.k8s.io
+      #   kind: Gateway
+      #   name: gateway
+      #   namespace: istio-ingress
+      #   sectionName: default-443
+      
+    api:
+      # -- Enable [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) for the API.
+      enabled: false
+      # -- Annotations to be added to the API HTTPRoute.
+      annotations: {}
+      # -- Labels to be added to the API HTTPRoute.
+      labels: {}
+      # -- Hostnames for the API HTTPRoute.
+      hostnames:
+        - chart-example.local
+      # -- ParentRefs for the API HTTPRoute.
+      parentRefs: []
+      # -- Path prefix for the API route.
+      pathPrefix: /api
+
+  tcpRoutes:
+    sftp:
+      # -- Enable TCPRoute for SFTP.
+      enabled: false
+      # -- Annotations to be added to the SFTP TCPRoute.
+      annotations: {}
+      # -- Labels to be added to the SFTP TCPRoute.
+      labels: {}
+      # -- ParentRefs for the SFTP TCPRoute.
+      parentRefs: []
+      # Example:
+      # parentRefs:
+      #   - name: my-gateway
+      #     namespace: gateway-namespace
+      #     sectionName: sftp
