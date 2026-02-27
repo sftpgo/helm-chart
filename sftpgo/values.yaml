@@ -405,3 +405,23 @@ persistence:
       requests:
         storage: 5Gi
     storageClassName: ""
+
+# -- Prometheus PodMonitor configuration.
+# See the [Prometheus Operator documentation](https://prometheus-operator.dev/docs/operator/api/#monitoring.coreos.com/v1.PodMonitor) for details.
+podMonitor:
+  # -- Enable PodMonitor resource for Prometheus Operator to scrape pod metrics.
+  enabled: false
+
+  # -- Additional labels for the PodMonitor resource.
+  # Useful if your Prometheus Operator requires specific labels to discover the monitor.
+  labels: {}
+    # release: kube-prometheus-stack
+
+  # -- Additional annotations for the PodMonitor resource.
+  annotations: {}
+
+  # -- Scrape interval (e.g., 10s, 1m).
+  interval: 1m
+
+  # -- Scrape timeout (e.g., 10s).
+  scrapeTimeout: 10s

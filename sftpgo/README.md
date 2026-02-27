@@ -131,6 +131,12 @@ require at least one port.
 | persistence.pvc | object | `{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""}` | Create the pvc desired specificiation. |
 | podAnnotations | object | `{}` | Annotations to be added to pods. |
 | podLabels | object | `{}` | Labels to be added to pods. |
+| podMonitor | object | `{"annotations":{},"enabled":false,"interval":"1m","labels":{},"scrapeTimeout":"10s"}` | Prometheus PodMonitor configuration. See the [Prometheus Operator documentation](https://prometheus-operator.dev/docs/operator/api/#monitoring.coreos.com/v1.PodMonitor) for details. |
+| podMonitor.annotations | object | `{}` | Additional annotations for the PodMonitor resource. |
+| podMonitor.enabled | bool | `false` | Enable PodMonitor resource for Prometheus Operator to scrape pod metrics. |
+| podMonitor.interval | string | `"1m"` | Scrape interval (e.g., 10s, 1m). |
+| podMonitor.labels | object | `{}` | Additional labels for the PodMonitor resource. Useful if your Prometheus Operator requires specific labels to discover the monitor. |
+| podMonitor.scrapeTimeout | string | `"10s"` | Scrape timeout (e.g., 10s). |
 | podPriorityClassName | string | `nil` | Pod priority class name. |
 | podSecurityContext | object | `{"fsGroup":1000}` | Pod [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context) for details. |
 | podTerminationGracePeriodSeconds | string | `nil` | Duration in seconds the pod needs to terminate gracefully. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#lifecycle) for details. Should be set in conjunction with SFTPGO_GRACE_TIME environment variable. Expected value: number of seconds (int64). |
