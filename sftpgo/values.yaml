@@ -147,6 +147,26 @@ securityContext: {}
 # -- Add [init containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) to the pod.
 initContainers: []
 
+# -- Additional [containers](https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers) to run in the same pod (e.g., sidecars).
+# See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#containers) for details.
+extraContainers: []
+   # - name: http-sidecar
+   #   image: my-http-sidecar:1.0.0
+   #   imagePullPolicy: IfNotPresent
+   #   ports:
+   #     - name: http
+   #       containerPort: 9090
+   #       protocol: TCP
+   #   # -- Compute Resources required by this container.
+   #   # See [Resource Management for Pods and Containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) for details.
+   #   resources:
+   #     requests:
+   #       cpu: 50m       # 50 milliCPU (5% of a single CPU core)
+   #       memory: 64Mi   # 64 Megabytes of RAM
+   #     limits:
+   #       cpu: 100m      # Hard cap at 10% of a CPU core
+   #       memory: 128Mi  # Hard cap at 128 Megabytes of RAM
+
 service:
   # -- Annotations to be added to the service.
   annotations: {}
