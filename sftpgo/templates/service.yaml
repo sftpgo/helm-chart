@@ -37,9 +37,7 @@ spec:
       {{- end }}
       targetPort: sftp
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.GitVersion }}
       appProtocol: sftp-ssh
-      {{- end }}
     {{- end }}
     {{- if .Values.ftpd.enabled }}
     - name: ftp
@@ -49,9 +47,7 @@ spec:
       {{- end }}
       targetPort: ftp
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.GitVersion }}
       appProtocol: ftp
-      {{- end }}
     {{- $start := int .Values.service.ports.ftp.passiveRange.start }}
     {{- $end := int (add .Values.service.ports.ftp.passiveRange.end 1) }}
     {{- range $port := untilStep $start $end 1 }}
@@ -70,9 +66,7 @@ spec:
       {{- end }}
       targetPort: webdav
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.GitVersion }}
       appProtocol: webdav
-      {{- end }}
     {{- end }}
     {{- if .Values.httpd.enabled }}
     - name: http
@@ -82,17 +76,13 @@ spec:
       {{- end }}
       targetPort: http
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.GitVersion }}
       appProtocol: http
-      {{- end }}
     {{- end }}
     - name: telemetry
       port: 10000
       targetPort: telemetry
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.GitVersion }}
       appProtocol: http
-      {{- end }}
   selector:
     {{- include "sftpgo.selectorLabels" . | nindent 4 }}
 
@@ -134,9 +124,7 @@ spec:
       {{- end }}
       targetPort: sftp
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" $.Capabilities.KubeVersion.GitVersion }}
       appProtocol: sftp-ssh
-      {{- end }}
     {{- end }}
     {{- if and $.Values.ftpd.enabled $service.ports.ftp }}
     - name: ftp
@@ -146,7 +134,6 @@ spec:
       {{- end }}
       targetPort: ftp
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" $.Capabilities.KubeVersion.GitVersion }}
       appProtocol: ftp
       {{- end }}
     {{- if $service.ports.ftp.passiveRange }}
@@ -169,9 +156,7 @@ spec:
       {{- end }}
       targetPort: webdav
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" $.Capabilities.KubeVersion.GitVersion }}
       appProtocol: webdav
-      {{- end }}
     {{- end }}
     {{- if and $.Values.httpd.enabled $service.ports.http }}
     - name: http
@@ -181,9 +166,7 @@ spec:
       {{- end }}
       targetPort: http
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" $.Capabilities.KubeVersion.GitVersion }}
       appProtocol: http
-      {{- end }}
     {{- end }}
   selector:
     {{- include "sftpgo.selectorLabels" $ | nindent 4 }}

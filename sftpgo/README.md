@@ -111,6 +111,7 @@ require at least one port.
 | env | object | `{}` | Additional environment variables passed directly to containers using a simplified key-value syntax. |
 | envFrom | list | `[]` | Additional environment variables mounted from [secrets](https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables) or [config maps](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables) for details. |
 | envVars | list | `[]` | Additional environment variables passed directly to containers. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables) for details. |
+| extraContainers | list | `[]` | Additional [containers](https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers) to run in the same pod (e.g., sidecars). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#containers) for details. |
 | ftpd.enabled | bool | `false` | Enable FTP service. |
 | ftpd.port | int | `2021` | Container FTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting. |
 | fullnameOverride | string | `""` | A name to substitute for the full names of resources. |
@@ -124,10 +125,18 @@ require at least one port.
 | initContainers | list | `[]` | Add [init containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) to the pod. |
 | nameOverride | string | `""` | A name in place of the chart name for `app:` labels. |
 | nodeSelector | object | `{}` | [Node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) configuration. |
+| pdb | object | `{"enabled":false}` | [Pod Disruption Budget](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/) configuration. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/policy-resources/pod-disruption-budget-v1/) for details. Note: minAvailable and maxUnavailable cannot be used simultaneously. |
+| pdb.enabled | bool | `false` | Enable Pod Disruption Budget creation. |
 | persistence.enabled | bool | `false` | Enable persistent storage for the /var/lib/sftpgo directory, saving state of the default sqlite db. |
 | persistence.pvc | object | `{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""}` | Create the pvc desired specificiation. |
 | podAnnotations | object | `{}` | Annotations to be added to pods. |
 | podLabels | object | `{}` | Labels to be added to pods. |
+| podMonitor | object | `{"annotations":{},"enabled":false,"interval":"1m","labels":{},"scrapeTimeout":"10s"}` | Prometheus PodMonitor configuration. See the [Prometheus Operator documentation](https://prometheus-operator.dev/docs/operator/api/#monitoring.coreos.com/v1.PodMonitor) for details. |
+| podMonitor.annotations | object | `{}` | Additional annotations for the PodMonitor resource. |
+| podMonitor.enabled | bool | `false` | Enable PodMonitor resource for Prometheus Operator to scrape pod metrics. |
+| podMonitor.interval | string | `"1m"` | Scrape interval (e.g., 10s, 1m). |
+| podMonitor.labels | object | `{}` | Additional labels for the PodMonitor resource. Useful if your Prometheus Operator requires specific labels to discover the monitor. |
+| podMonitor.scrapeTimeout | string | `"10s"` | Scrape timeout (e.g., 10s). |
 | podPriorityClassName | string | `nil` | Pod priority class name. |
 | podSecurityContext | object | `{"fsGroup":1000}` | Pod [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context) for details. |
 | podTerminationGracePeriodSeconds | string | `nil` | Duration in seconds the pod needs to terminate gracefully. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#lifecycle) for details. Should be set in conjunction with SFTPGO_GRACE_TIME environment variable. Expected value: number of seconds (int64). |
