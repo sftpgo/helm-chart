@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "sftpgo.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "sftpgo.labels" . | nindent 4 }}
     {{- if .Values.deploymentLabels }}
@@ -15,6 +16,7 @@ spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- with .Values.deploymentStrategy }}
   strategy:
     {{- toYaml . | nindent 4 }}
@@ -43,6 +45,9 @@ spec:
       hostNetwork: {{ .Values.hostNetwork }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if not (quote .Values.podTerminationGracePeriodSeconds | empty) }}
+      terminationGracePeriodSeconds: {{ .Values.podTerminationGracePeriodSeconds }}
+      {{- end }}
       {{- with .Values.initContainers }}
       initContainers:
         {{- toYaml . | nindent 8 }}
@@ -155,6 +160,9 @@ spec:
           {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
+        {{- with .Values.extraContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       volumes:
         - name: config
           configMap:
@@ -174,6 +182,9 @@ spec:
       {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podPriorityClassName }}
+      priorityClassName: {{ . }}
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:

@@ -21,14 +21,14 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get Dagger version
         id: dagger_version
         uses: sagikazarmark/dagger-version-action@v0.0.2
 
       - name: Run pipeline
-        uses: dagger/dagger-for-github@e47aba410ef9bb9ed81a4d2a97df31061e5e842e # v8.0.0
+        uses: dagger/dagger-for-github@456fc3af63a2ba6f9789af9c55045b459115541b # v8.3.0
         with:
           verb: call
           args: release --version ${{ github.ref_name }} --github-account ${{ github.repository_owner }} --github-actor ${{ github.actor }} --github-token env:GITHUB_TOKEN

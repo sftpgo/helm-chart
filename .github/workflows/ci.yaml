@@ -15,14 +15,14 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get Dagger version
         id: dagger_version
         uses: sagikazarmark/dagger-version-action@v0.0.2
 
       - name: Run pipeline
-        uses: dagger/dagger-for-github@e47aba410ef9bb9ed81a4d2a97df31061e5e842e # v8.0.0
+        uses: dagger/dagger-for-github@456fc3af63a2ba6f9789af9c55045b459115541b # v8.3.0
         with:
           verb: call
           args: build
@@ -35,24 +35,25 @@ jobs:
       fail-fast: false
       matrix:
         k3s:
-          #- latest
-          - v1.32.1-k3s1
-          - v1.31.5-k3s1
+          - latest
+          - v1.34.2-k3s1
+          - v1.33.6-k3s1
+          - v1.32.10-k3s1
+          - v1.31.14-k3s1
           - v1.30.9-k3s1
           - v1.29.13-k3s1
           - v1.28.15-k3s1
-          - v1.27.16-k3s1
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get Dagger version
         id: dagger_version
         uses: sagikazarmark/dagger-version-action@v0.0.2
 
       - name: Run pipeline
-        uses: dagger/dagger-for-github@e47aba410ef9bb9ed81a4d2a97df31061e5e842e # v8.0.0
+        uses: dagger/dagger-for-github@456fc3af63a2ba6f9789af9c55045b459115541b # v8.3.0
         with:
           verb: call
           args: test --version ${{ matrix.k3s }}
@@ -64,14 +65,14 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get Dagger version
         id: dagger_version
         uses: sagikazarmark/dagger-version-action@v0.0.2
 
       - name: Run pipeline
-        uses: dagger/dagger-for-github@e47aba410ef9bb9ed81a4d2a97df31061e5e842e # v8.0.0
+        uses: dagger/dagger-for-github@456fc3af63a2ba6f9789af9c55045b459115541b # v8.3.0
         with:
           verb: call
           args: lint

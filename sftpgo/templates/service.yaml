@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "sftpgo.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "sftpgo.labels" . | nindent 4 }}
     {{- if .Values.service.labels }}
@@ -36,9 +37,7 @@ spec:
       {{- end }}
       targetPort: sftp
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.GitVersion }}
       appProtocol: sftp-ssh
-      {{- end }}
     {{- end }}
     {{- if .Values.ftpd.enabled }}
     - name: ftp
@@ -48,9 +47,7 @@ spec:
       {{- end }}
       targetPort: ftp
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.GitVersion }}
       appProtocol: ftp
-      {{- end }}
     {{- $start := int .Values.service.ports.ftp.passiveRange.start }}
     {{- $end := int (add .Values.service.ports.ftp.passiveRange.end 1) }}
     {{- range $port := untilStep $start $end 1 }}
@@ -69,9 +66,7 @@ spec:
       {{- end }}
       targetPort: webdav
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.GitVersion }}
       appProtocol: webdav
-      {{- end }}
     {{- end }}
     {{- if .Values.httpd.enabled }}
     - name: http
@@ -81,17 +76,13 @@ spec:
       {{- end }}
       targetPort: http
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.GitVersion }}
       appProtocol: http
-      {{- end }}
     {{- end }}
     - name: telemetry
       port: 10000
       targetPort: telemetry
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.GitVersion }}
       appProtocol: http
-      {{- end }}
   selector:
     {{- include "sftpgo.selectorLabels" . | nindent 4 }}
 
@@ -101,6 +92,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "sftpgo.componentname" (list $ $name) }}
+  namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "sftpgo.labels" $ | nindent 4 }}
   {{- with $service.annotations }}
@@ -119,9 +111,9 @@ spec:
   {{- with $service.loadBalancerSourceRanges }}
   loadBalancerSourceRanges: {{ toYaml . | nindent 4 }}
   {{- end }}
+  {{- end }}
   {{- with $service.sessionAffinity }}
   sessionAffinity: {{ . }}
-  {{- end }}
   {{- end }}
   ports:
     {{- if and $.Values.sftpd.enabled $service.ports.sftp }}
@@ -132,9 +124,7 @@ spec:
       {{- end }}
       targetPort: sftp
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" $.Capabilities.KubeVersion.GitVersion }}
       appProtocol: sftp-ssh
-      {{- end }}
     {{- end }}
     {{- if and $.Values.ftpd.enabled $service.ports.ftp }}
     - name: ftp
@@ -144,9 +134,7 @@ spec:
       {{- end }}
       targetPort: ftp
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" $.Capabilities.KubeVersion.GitVersion }}
       appProtocol: ftp
-      {{- end }}
     {{- end }}
     {{- if and $.Values.webdavd.enabled $service.ports.webdav }}
     - name: webdav
@@ -156,9 +144,7 @@ spec:
       {{- end }}
       targetPort: webdav
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" $.Capabilities.KubeVersion.GitVersion }}
       appProtocol: webdav
-      {{- end }}
     {{- end }}
     {{- if and $.Values.httpd.enabled $service.ports.http }}
     - name: http
@@ -168,9 +154,7 @@ spec:
       {{- end }}
       targetPort: http
       protocol: TCP
-      {{- if semverCompare ">=1.20-0" $.Capabilities.KubeVersion.GitVersion }}
       appProtocol: http
-      {{- end }}
     {{- end }}
   selector:
     {{- include "sftpgo.selectorLabels" $ | nindent 4 }}

@@ -5,6 +5,9 @@
 # -- Number of replicas (pods) to launch.
 replicaCount: 1
 
+# -- Number of old ReplicaSets to retain to allow rollback.
+revisionHistoryLimit: 10
+
 # -- Define the [strategy](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy) to replace old Pods by new ones during updates.
 deploymentStrategy: {}
 
@@ -106,6 +109,9 @@ serviceAccount:
   # -- Enable service account creation.
   create: true
 
+  # -- Automount API credentials for the Service Account.
+  automountServiceAccountToken: true
+
   # -- Annotations to be added to the service account.
   annotations: {}
 
@@ -125,6 +131,15 @@ podAnnotations: {}
 # -- Labels to be added to pods.
 podLabels: {}
 
+# -- Pod priority class name.
+podPriorityClassName:
+
+# -- Duration in seconds the pod needs to terminate gracefully.
+# See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#lifecycle) for details.
+# Should be set in conjunction with SFTPGO_GRACE_TIME environment variable.
+# Expected value: number of seconds (int64).
+podTerminationGracePeriodSeconds: null
+
 # -- Pod [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod).
 # See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context) for details.
 podSecurityContext:
@@ -141,6 +156,26 @@ securityContext: {}
 
 # -- Add [init containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) to the pod.
 initContainers: []
+
+# -- Additional [containers](https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers) to run in the same pod (e.g., sidecars).
+# See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#containers) for details.
+extraContainers: []
+   # - name: http-sidecar
+   #   image: my-http-sidecar:1.0.0
+   #   imagePullPolicy: IfNotPresent
+   #   ports:
+   #     - name: http
+   #       containerPort: 9090
+   #       protocol: TCP
+   #   # -- Compute Resources required by this container.
+   #   # See [Resource Management for Pods and Containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) for details.
+   #   resources:
+   #     requests:
+   #       cpu: 50m       # 50 milliCPU (5% of a single CPU core)
+   #       memory: 64Mi   # 64 Megabytes of RAM
+   #     limits:
+   #       cpu: 100m      # Hard cap at 10% of a CPU core
+   #       memory: 128Mi  # Hard cap at 128 Megabytes of RAM
 
 service:
   # -- Annotations to be added to the service.
@@ -330,6 +365,15 @@ autoscaling:
   #       type: Value
   #       value: 10k
 
+# -- [Pod Disruption Budget](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/) configuration.
+# See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/policy-resources/pod-disruption-budget-v1/) for details.
+# Note: minAvailable and maxUnavailable cannot be used simultaneously.
+pdb:
+  # -- Enable Pod Disruption Budget creation.
+  enabled: false
+  # minAvailable: 1
+  # maxUnavailable: 1
+
 # -- [Node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) configuration.
 nodeSelector: {}
 
@@ -371,3 +415,23 @@ persistence:
       requests:
         storage: 5Gi
     storageClassName: ""
+
+# -- Prometheus PodMonitor configuration.
+# See the [Prometheus Operator documentation](https://prometheus-operator.dev/docs/operator/api/#monitoring.coreos.com/v1.PodMonitor) for details.
+podMonitor:
+  # -- Enable PodMonitor resource for Prometheus Operator to scrape pod metrics.
+  enabled: false
+
+  # -- Additional labels for the PodMonitor resource.
+  # Useful if your Prometheus Operator requires specific labels to discover the monitor.
+  labels: {}
+    # release: kube-prometheus-stack
+
+  # -- Additional annotations for the PodMonitor resource.
+  annotations: {}
+
+  # -- Scrape interval (e.g., 10s, 1m).
+  interval: 1m
+
+  # -- Scrape timeout (e.g., 10s).
+  scrapeTimeout: 10s
