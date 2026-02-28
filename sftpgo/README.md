@@ -125,6 +125,11 @@ require at least one port.
 | imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when [pulling images](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret) (from private registries). |
 | initContainers | list | `[]` | Add [init containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) to the pod. |
 | nameOverride | string | `""` | A name in place of the chart name for `app:` labels. |
+| networkPolicy | object | `{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]}` | [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) configuration. |
+| networkPolicy.egress | list | `[]` | Egress rules. |
+| networkPolicy.enabled | bool | `false` | Enable creation of NetworkPolicy resources. |
+| networkPolicy.ingress | list | `[]` | Ingress rules. |
+| networkPolicy.policyTypes | list | `[]` | Specifies the policy types. Defaults to Ingress and Egress if not specified. |
 | nodeSelector | object | `{}` | [Node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) configuration. |
 | pdb | object | `{"enabled":false}` | [Pod Disruption Budget](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/) configuration. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/policy-resources/pod-disruption-budget-v1/) for details. Note: minAvailable and maxUnavailable cannot be used simultaneously. |
 | pdb.enabled | bool | `false` | Enable Pod Disruption Budget creation. |

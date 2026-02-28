@@ -384,6 +384,17 @@ affinity: {}
 # Warning: The use of host network is [discouraged](https://kubernetes.io/docs/concepts/configuration/overview/#services). Make sure to use it only when absolutely necessary.
 hostNetwork: false
 
+# -- [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) configuration.
+networkPolicy:
+  # -- Enable creation of NetworkPolicy resources.
+  enabled: false
+  # -- Specifies the policy types. Defaults to Ingress and Egress if not specified.
+  policyTypes: []
+  # -- Ingress rules.
+  ingress: []
+  # -- Egress rules.
+  egress: []
+
 # -- [Topology Spread Constraints](https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/) configuration.
 # Accepts a list of constraints. The legacy object format is also supported for backward compatibility.
 topologySpreadConstraints: []

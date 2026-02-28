@@ -1,0 +1,22 @@
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+  
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: allowed-client
+      ports:
+        - port: 2022
+          protocol: TCP
+          
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 10.0.0.0/24
+      ports:
+        - port: 5432
+          protocol: TCP
