@@ -127,6 +127,11 @@ spec:
             - name: telemetry
               containerPort: 10000
               protocol: TCP
+            {{- range $name, $port := .Values.additionalPorts }}
+            - name: {{ $name }}
+              containerPort: {{ $port.containerPort }}
+              protocol: TCP
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /healthz

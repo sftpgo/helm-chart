@@ -242,6 +242,11 @@ services: {}
   #   externalTrafficPolicy:
   #   sessionAffinity:
 
+# -- Additional ports to expose in the deployment and service.
+additionalPorts: {}
+  # custom-sftp:
+  #   port: 2222           # Service port
+  #   containerPort: 22    # Pod port
 
 ui:
   ingress:

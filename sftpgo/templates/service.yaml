@@ -83,6 +83,12 @@ spec:
       targetPort: telemetry
       protocol: TCP
       appProtocol: http
+    {{- range $name, $port := .Values.additionalPorts }}
+    - name: {{ $name }}
+      port: {{ $port.port | default $port.containerPort }}
+      targetPort: {{ $name }}
+      protocol: TCP
+    {{- end }}
   selector:
     {{- include "sftpgo.selectorLabels" . | nindent 4 }}
 

@@ -97,6 +97,7 @@ require at least one port.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| additionalPorts | object | `{}` | Additional ports to expose in the deployment and service. |
 | affinity | object | `{}` | [Affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity) configuration. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#scheduling) for details. |
 | api.ingress.annotations | object | `{}` | Annotations to be added to the ingress. |
 | api.ingress.className | string | `""` | Ingress [class name](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class). |
