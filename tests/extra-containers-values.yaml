@@ -1,0 +1,12 @@
+extraContainers:
+  - name: test-sidecar
+    image: busybox:1
+    imagePullPolicy: IfNotPresent
+    command: ["sleep", "3600"]
+    resources:
+      requests:
+        cpu: 10m
+        memory: 10Mi
+      limits:
+        cpu: 50m
+        memory: 20Mi
