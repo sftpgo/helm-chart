@@ -8,6 +8,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "sftpgo.labels" . | nindent 4 }}
+  {{- with .Values.persistence.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- toYaml .Values.persistence.pvc | nindent 2 }}
 {{- end }}

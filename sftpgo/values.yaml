@@ -408,6 +408,9 @@ persistence:
   # -- Enable persistent storage for the /var/lib/sftpgo directory, saving state of the default sqlite db.
   enabled: false
 
+  # -- Annotations to be added to the PVC.
+  annotations: {}
+
   # -- Create the pvc desired specificiation.
   pvc:
     accessModes:

@@ -133,6 +133,7 @@ require at least one port.
 | nodeSelector | object | `{}` | [Node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) configuration. |
 | pdb | object | `{"enabled":false}` | [Pod Disruption Budget](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/) configuration. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/policy-resources/pod-disruption-budget-v1/) for details. Note: minAvailable and maxUnavailable cannot be used simultaneously. |
 | pdb.enabled | bool | `false` | Enable Pod Disruption Budget creation. |
+| persistence.annotations | object | `{}` | Annotations to be added to the PVC. |
 | persistence.enabled | bool | `false` | Enable persistent storage for the /var/lib/sftpgo directory, saving state of the default sqlite db. |
 | persistence.pvc | object | `{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""}` | Create the pvc desired specificiation. |
 | podAnnotations | object | `{}` | Annotations to be added to pods. |
