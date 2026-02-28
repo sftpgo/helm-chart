@@ -5,7 +5,12 @@ services:
     loadBalancerIP:
     loadBalancerSourceRanges: []
     ports:
-      sftp:  # Only SFTP will be exposed
+      sftp:
         port: 22
         nodePort:
+      ftp:
+        port: 21
+        passiveRange:
+          start: 50000
+          end: 50005
     externalTrafficPolicy:
