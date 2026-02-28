@@ -1,3 +1,4 @@
+{{- $selectorLabels := fromYaml (include "sftpgo.selectorLabels" .) -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -184,12 +185,22 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.topologySpreadConstraints.enabled }}
+      
+      {{- $topologyConstraints := list -}}
+      
+      {{- if kindIs "slice" .Values.topologySpreadConstraints }}
+        {{- range $constraint := .Values.topologySpreadConstraints }}
+          {{- if not $constraint.labelSelector }}
+            {{- $_ := set $constraint "labelSelector" (dict "matchLabels" $selectorLabels) }}
+          {{- end }}
+          {{- $topologyConstraints = append $topologyConstraints $constraint -}}
+        {{- end }}  
+      {{- else if and (kindIs "map" .Values.topologySpreadConstraints) .Values.topologySpreadConstraints.enabled }}
+        {{- $legacyConstraint := dict "maxSkew" (default 1 .Values.topologySpreadConstraints.maxSkew) "topologyKey" (default "topology.kubernetes.io/zone" .Values.topologySpreadConstraints.topologyKey) "whenUnsatisfiable" (default "DoNotSchedule" .Values.topologySpreadConstraints.whenUnsatisfiable) "labelSelector" (dict "matchLabels" $selectorLabels) -}}
+        {{- $topologyConstraints = append $topologyConstraints $legacyConstraint -}}
+      {{- end }}
+      
+      {{- if not (empty $topologyConstraints) }}
       topologySpreadConstraints:
-        - labelSelector:
-            matchLabels:
-              {{- include "sftpgo.selectorLabels" . | nindent 14 }}
-          maxSkew: {{ .Values.topologySpreadConstraints.maxSkew }}
-          topologyKey: {{ .Values.topologySpreadConstraints.topologyKey }}
-          whenUnsatisfiable: {{ .Values.topologySpreadConstraints.whenUnsatisfiable }}
+        {{- toYaml $topologyConstraints | nindent 8 }}
       {{- end }}
