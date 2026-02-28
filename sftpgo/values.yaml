@@ -11,6 +11,9 @@ revisionHistoryLimit: 10
 # -- Define the [strategy](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy) to replace old Pods by new ones during updates.
 deploymentStrategy: {}
 
+# -- Add [lifecycleHooks ](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/) to the pod.
+lifecycleHooks: []
+
 image:
   # -- Name of the image repository to pull the container image from.
   repository: ghcr.io/drakkan/sftpgo
