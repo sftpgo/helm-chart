@@ -152,6 +152,7 @@ gatewayApi:
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| additionalPorts | object | `{}` | Additional ports to expose in the deployment and service. |
 | affinity | object | `{}` | [Affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity) configuration. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#scheduling) for details. |
 | api.ingress.annotations | object | `{}` | Annotations to be added to the ingress. |
 | api.ingress.className | string | `""` | Ingress [class name](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class). |
@@ -166,6 +167,7 @@ gatewayApi:
 | env | object | `{}` | Additional environment variables passed directly to containers using a simplified key-value syntax. |
 | envFrom | list | `[]` | Additional environment variables mounted from [secrets](https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables) or [config maps](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables) for details. |
 | envVars | list | `[]` | Additional environment variables passed directly to containers. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables) for details. |
+| extraContainers | list | `[]` | Additional [containers](https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers) to run in the same pod (e.g., sidecars). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#containers) for details. |
 | ftpd.enabled | bool | `false` | Enable FTP service. |
 | ftpd.port | int | `2021` | Container FTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting. |
 | fullnameOverride | string | `""` | A name to substitute for the full names of resources. |
@@ -193,11 +195,25 @@ gatewayApi:
 | imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when [pulling images](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret) (from private registries). |
 | initContainers | list | `[]` | Add [init containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) to the pod. |
 | nameOverride | string | `""` | A name in place of the chart name for `app:` labels. |
+| networkPolicy | object | `{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]}` | [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) configuration. |
+| networkPolicy.egress | list | `[]` | Egress rules. |
+| networkPolicy.enabled | bool | `false` | Enable creation of NetworkPolicy resources. |
+| networkPolicy.ingress | list | `[]` | Ingress rules. |
+| networkPolicy.policyTypes | list | `[]` | Specifies the policy types. Defaults to Ingress and Egress if not specified. |
 | nodeSelector | object | `{}` | [Node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) configuration. |
+| pdb | object | `{"enabled":false}` | [Pod Disruption Budget](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/) configuration. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/policy-resources/pod-disruption-budget-v1/) for details. Note: minAvailable and maxUnavailable cannot be used simultaneously. |
+| pdb.enabled | bool | `false` | Enable Pod Disruption Budget creation. |
+| persistence.annotations | object | `{}` | Annotations to be added to the PVC. |
 | persistence.enabled | bool | `false` | Enable persistent storage for the /var/lib/sftpgo directory, saving state of the default sqlite db. |
 | persistence.pvc | object | `{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""}` | Create the pvc desired specificiation. |
 | podAnnotations | object | `{}` | Annotations to be added to pods. |
 | podLabels | object | `{}` | Labels to be added to pods. |
+| podMonitor | object | `{"annotations":{},"enabled":false,"interval":"1m","labels":{},"scrapeTimeout":"10s"}` | Prometheus PodMonitor configuration. See the [Prometheus Operator documentation](https://prometheus-operator.dev/docs/operator/api/#monitoring.coreos.com/v1.PodMonitor) for details. |
+| podMonitor.annotations | object | `{}` | Additional annotations for the PodMonitor resource. |
+| podMonitor.enabled | bool | `false` | Enable PodMonitor resource for Prometheus Operator to scrape pod metrics. |
+| podMonitor.interval | string | `"1m"` | Scrape interval (e.g., 10s, 1m). |
+| podMonitor.labels | object | `{}` | Additional labels for the PodMonitor resource. Useful if your Prometheus Operator requires specific labels to discover the monitor. |
+| podMonitor.scrapeTimeout | string | `"10s"` | Scrape timeout (e.g., 10s). |
 | podPriorityClassName | string | `nil` | Pod priority class name. |
 | podSecurityContext | object | `{"fsGroup":1000}` | Pod [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context) for details. |
 | podTerminationGracePeriodSeconds | string | `nil` | Duration in seconds the pod needs to terminate gracefully. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#lifecycle) for details. Should be set in conjunction with SFTPGO_GRACE_TIME environment variable. Expected value: number of seconds (int64). |
@@ -230,10 +246,7 @@ gatewayApi:
 | sftpd.enabled | bool | `true` | Enable SFTP service. |
 | sftpd.port | int | `2022` | Container SFTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting. |
 | tolerations | list | `[]` | [Tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) for node taints. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#scheduling) for details. |
-| topologySpreadConstraints.enabled | bool | `false` | Enable pod [Topology Spread Constraints](https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/). |
-| topologySpreadConstraints.maxSkew | int | `1` | Degree to which pods may be unevenly distributed. |
-| topologySpreadConstraints.topologyKey | string | `"topology.kubernetes.io/zone"` | The key of node labels. See https://kubernetes.io/docs/reference/kubernetes-api/labels-annotations-taints/ |
-| topologySpreadConstraints.whenUnsatisfiable | string | `"DoNotSchedule"` | How to deal with a Pod if it doesn't satisfy the spread constraint. |
+| topologySpreadConstraints | list | `[]` | [Topology Spread Constraints](https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/) configuration. Accepts a list of constraints. The legacy object format is also supported for backward compatibility. |
 | ui.ingress.annotations | object | `{}` | Annotations to be added to the ingress. |
 | ui.ingress.className | string | `""` | Ingress [class name](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class). |
 | ui.ingress.enabled | bool | `false` | Enable [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/). |

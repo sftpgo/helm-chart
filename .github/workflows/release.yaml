@@ -28,7 +28,7 @@ jobs:
         uses: sagikazarmark/dagger-version-action@v0.0.2
 
       - name: Run pipeline
-        uses: dagger/dagger-for-github@d913e70051faf3b907d4dd96ef1161083c88c644 # v8.2.0
+        uses: dagger/dagger-for-github@456fc3af63a2ba6f9789af9c55045b459115541b # v8.3.0
         with:
           verb: call
           args: release --version ${{ github.ref_name }} --github-account ${{ github.repository_owner }} --github-actor ${{ github.actor }} --github-token env:GITHUB_TOKEN

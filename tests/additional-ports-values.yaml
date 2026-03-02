@@ -1,0 +1,6 @@
+additionalPorts:
+  custom-sftp:
+    port: 2222
+    containerPort: 22
+  metrics-alt:
+    containerPort: 9090

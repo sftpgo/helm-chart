@@ -1,0 +1,12 @@
+persistence:
+  enabled: true
+  annotations:
+    nfs.io/storage-path: "sftpgo"
+    test.kubernetes.io/custom-annotation: "success"
+  pvc:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+    storageClassName: null

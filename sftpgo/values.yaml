@@ -147,6 +147,26 @@ securityContext: {}
 # -- Add [init containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) to the pod.
 initContainers: []
 
+# -- Additional [containers](https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers) to run in the same pod (e.g., sidecars).
+# See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#containers) for details.
+extraContainers: []
+   # - name: http-sidecar
+   #   image: my-http-sidecar:1.0.0
+   #   imagePullPolicy: IfNotPresent
+   #   ports:
+   #     - name: http
+   #       containerPort: 9090
+   #       protocol: TCP
+   #   # -- Compute Resources required by this container.
+   #   # See [Resource Management for Pods and Containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) for details.
+   #   resources:
+   #     requests:
+   #       cpu: 50m       # 50 milliCPU (5% of a single CPU core)
+   #       memory: 64Mi   # 64 Megabytes of RAM
+   #     limits:
+   #       cpu: 100m      # Hard cap at 10% of a CPU core
+   #       memory: 128Mi  # Hard cap at 128 Megabytes of RAM
+
 service:
   # -- Annotations to be added to the service.
   annotations: {}
@@ -221,6 +241,12 @@ services: {}
   #       nodePort:
   #   externalTrafficPolicy:
   #   sessionAffinity:
+
+# -- Additional ports to expose in the deployment and service.
+additionalPorts: {}
+  # custom-sftp:
+  #   port: 2222           # Service port
+  #   containerPort: 22    # Pod port
 
 ui:
   ingress:
@@ -334,6 +360,15 @@ autoscaling:
   #       type: Value
   #       value: 10k
 
+# -- [Pod Disruption Budget](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/) configuration.
+# See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/policy-resources/pod-disruption-budget-v1/) for details.
+# Note: minAvailable and maxUnavailable cannot be used simultaneously.
+pdb:
+  # -- Enable Pod Disruption Budget creation.
+  enabled: false
+  # minAvailable: 1
+  # maxUnavailable: 1
+
 # -- [Node selector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) configuration.
 nodeSelector: {}
 
@@ -349,23 +384,32 @@ affinity: {}
 # Warning: The use of host network is [discouraged](https://kubernetes.io/docs/concepts/configuration/overview/#services). Make sure to use it only when absolutely necessary.
 hostNetwork: false
 
-topologySpreadConstraints:
-  # -- Enable pod [Topology Spread Constraints](https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/).
+# -- [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) configuration.
+networkPolicy:
+  # -- Enable creation of NetworkPolicy resources.
   enabled: false
+  # -- Specifies the policy types. Defaults to Ingress and Egress if not specified.
+  policyTypes: []
+  # -- Ingress rules.
+  ingress: []
+  # -- Egress rules.
+  egress: []
 
-  # -- Degree to which pods may be unevenly distributed.
-  maxSkew: 1
-
-  # -- The key of node labels.
-  # See https://kubernetes.io/docs/reference/kubernetes-api/labels-annotations-taints/
-  topologyKey: topology.kubernetes.io/zone
-
-  # -- How to deal with a Pod if it doesn't satisfy the spread constraint.
-  whenUnsatisfiable: DoNotSchedule
+# -- [Topology Spread Constraints](https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/) configuration.
+# Accepts a list of constraints. The legacy object format is also supported for backward compatibility.
+topologySpreadConstraints: []
+  # - maxSkew: 1
+  #   topologyKey: topology.kubernetes.io/zone
+  #   whenUnsatisfiable: DoNotSchedule
+  #   matchLabelKeys:
+  #     - pod-template-hash
 
 persistence:
   # -- Enable persistent storage for the /var/lib/sftpgo directory, saving state of the default sqlite db.
   enabled: false
+
+  # -- Annotations to be added to the PVC.
+  annotations: {}
 
   # -- Create the pvc desired specificiation.
   pvc:
@@ -428,3 +472,22 @@ gatewayApi:
       #   - name: my-gateway
       #     namespace: gateway-namespace
       #     sectionName: sftp
+# -- Prometheus PodMonitor configuration.
+# See the [Prometheus Operator documentation](https://prometheus-operator.dev/docs/operator/api/#monitoring.coreos.com/v1.PodMonitor) for details.
+podMonitor:
+  # -- Enable PodMonitor resource for Prometheus Operator to scrape pod metrics.
+  enabled: false
+
+  # -- Additional labels for the PodMonitor resource.
+  # Useful if your Prometheus Operator requires specific labels to discover the monitor.
+  labels: {}
+    # release: kube-prometheus-stack
+
+  # -- Additional annotations for the PodMonitor resource.
+  annotations: {}
+
+  # -- Scrape interval (e.g., 10s, 1m).
+  interval: 1m
+
+  # -- Scrape timeout (e.g., 10s).
+  scrapeTimeout: 10s
