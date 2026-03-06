@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	helmVersion     = "3.16.1"
+	helmVersion     = "4.1.1"
 	helmDocsVersion = "v1.14.2"
 )
 
