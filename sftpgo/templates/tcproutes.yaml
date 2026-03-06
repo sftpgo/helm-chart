@@ -23,3 +23,30 @@ spec:
         - name: {{ include "sftpgo.fullname" . }}
           port: {{ $.Values.service.ports.sftp.port }}
 {{- end }}
+
+{{- if and .Values.ftpd.enabled .Values.gatewayApi.tcpRoutes.ftp.enabled -}}
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: {{ include "sftpgo.componentname" (list . "ftp") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sftpgo.labels" . | nindent 4 }}
+    {{- with .Values.gatewayApi.tcpRoutes.ftp.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.gatewayApi.tcpRoutes.ftp.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.gatewayApi.tcpRoutes.ftp.parentRefs }}
+  parentRefs:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    - backendRefs:
+        - name: {{ include "sftpgo.fullname" . }}
+          port: {{ $.Values.service.ports.ftp.port }}
+{{- end }}

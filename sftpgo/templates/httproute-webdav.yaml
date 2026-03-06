@@ -1,0 +1,39 @@
+{{- if and $.Values.webdavd.enabled .Values.gatewayApi.httpRoutes.webdav.enabled -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "sftpgo.componentname" (list . "webdav") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sftpgo.labels" . | nindent 4 }}
+    {{- with .Values.gatewayApi.httpRoutes.webdav.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.gatewayApi.httpRoutes.webdav.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.gatewayApi.httpRoutes.webdav.parentRefs }}
+  parentRefs:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.gatewayApi.httpRoutes.webdav.hostnames }}
+  hostnames:
+    {{- range . }}
+    - {{ . | quote }}
+    {{- end }}
+  {{- end }}
+  rules:
+  {{- $backend := .Values.gatewayApi.httpRoutes.webdav.backend | default dict }}
+    - backendRefs:
+        - kind: {{ $backend.kind | default "Service" }}
+          name: {{ include "sftpgo.fullname" $ }}
+          port: {{ $.Values.service.ports.webdav.port }}
+          weight: {{ $backend.weight | default 1 }}
+      matches:
+        - path:
+            type: PathPrefix
+            value: /
+{{- end }}
+

@@ -99,9 +99,11 @@ The chart supports [Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/) fo
 
 **Prerequisites:** You must have a `Gateway` resource already configured and working in your cluster before enabling Gateway API routes in this chart to make it work.
 
-#### HTTPRoute for UI and API
+**Note on TCPRoute:** The `TCPRoute` resources in this chart currently use the `gateway.networking.k8s.io/v1alpha2` API version. Make sure the experimental Gateway API CRDs/APIs are installed and enabled in your cluster if you plan to use TCP routes.
 
-The chart can create `HTTPRoute` resources for both the web UI and REST API endpoints:
+#### HTTPRoute for UI, API and WebDAV
+
+The chart can create `HTTPRoute` resources for the web UI, REST API endpoints and the WebDAV service:
 
 **Example: Exposing the UI via HTTPRoute**
 
@@ -134,9 +136,26 @@ gatewayApi:
       pathPrefix: /api
 ```
 
-#### TCPRoute for SFTP
+**Example: Exposing the WebDAV service via HTTPRoute**
 
-For TCP-based protocols like SFTP, you need to use `TCPRoute` instead of `HTTPRoute`:
+```yaml
+gatewayApi:
+  httpRoutes:
+    webdav:
+      enabled: true
+      hostnames:
+        - sftpgo-webdav.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: istio-system
+          sectionName: http
+```
+
+You can optionally customize the backend for each `HTTPRoute` (for example to change the `kind` or `weight`) via the `gatewayApi.httpRoutes.<route>.backend` object.
+
+#### TCPRoute for SFTP and FTP
+
+For TCP-based protocols like SFTP and FTP, you need to use `TCPRoute` instead of `HTTPRoute`:
 
 ```yaml
 gatewayApi:
@@ -147,6 +166,12 @@ gatewayApi:
         - name: my-gateway
           namespace: istio-system
           sectionName: sftp
+    ftp:
+      enabled: true
+      parentRefs:
+        - name: my-gateway
+          namespace: istio-system
+          sectionName: ftp
 ```
 ## Values
 
@@ -182,6 +207,15 @@ gatewayApi:
 | gatewayApi.httpRoutes.ui.hostnames | list | `["chart-example.local"]` | Hostnames for the UI HTTPRoute. |
 | gatewayApi.httpRoutes.ui.labels | object | `{}` | Labels to be added to the UI HTTPRoute. |
 | gatewayApi.httpRoutes.ui.parentRefs | list | `[]` | ParentRefs for the UI HTTPRoute. |
+| gatewayApi.httpRoutes.webdav.annotations | object | `{}` | Annotations to be added to the WebDAV HTTPRoute. |
+| gatewayApi.httpRoutes.webdav.enabled | bool | `false` | Enable [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) for the WebDAV service. |
+| gatewayApi.httpRoutes.webdav.hostnames | list | `["chart-example.local"]` | Hostnames for the WebDAV HTTPRoute. |
+| gatewayApi.httpRoutes.webdav.labels | object | `{}` | Labels to be added to the WebDAV HTTPRoute. |
+| gatewayApi.httpRoutes.webdav.parentRefs | list | `[]` | ParentRefs for the WebDAV HTTPRoute. |
+| gatewayApi.tcpRoutes.ftp.annotations | object | `{}` | Annotations to be added to the FTP TCPRoute. |
+| gatewayApi.tcpRoutes.ftp.enabled | bool | `false` | Enable TCPRoute for FTP. |
+| gatewayApi.tcpRoutes.ftp.labels | object | `{}` | Labels to be added to the FTP TCPRoute. |
+| gatewayApi.tcpRoutes.ftp.parentRefs | list | `[]` | ParentRefs for the FTP TCPRoute. |
 | gatewayApi.tcpRoutes.sftp.annotations | object | `{}` | Annotations to be added to the SFTP TCPRoute. |
 | gatewayApi.tcpRoutes.sftp.enabled | bool | `false` | Enable TCPRoute for SFTP. |
 | gatewayApi.tcpRoutes.sftp.labels | object | `{}` | Labels to be added to the SFTP TCPRoute. |
