@@ -94,6 +94,86 @@ services:
 Additional services accept the same options as the `service` option in the values file and
 require at least one port.
 
+### Gateway API (HTTPRoute and TCPRoute)
+
+The chart supports [Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/) for exposing SFTPGo services using `HTTPRoute` and `TCPRoute` resources. This is very useful when using SFTPgo in a cluster with Gateway API compatible ingress controllers like `istio` `Kong` or `Cilium`.
+
+**Prerequisites:** You must have a `Gateway` resource already configured and working in your cluster before enabling Gateway API routes in this chart to make it work.
+
+**Note on TCPRoute:** The `TCPRoute` resources in this chart currently use the `gateway.networking.k8s.io/v1alpha2` API version. Make sure the experimental Gateway API CRDs/APIs are installed and enabled in your cluster if you plan to use TCP routes.
+
+#### HTTPRoute for UI, API and WebDAV
+
+The chart can create `HTTPRoute` resources for the web UI, REST API endpoints and the WebDAV service:
+
+**Example: Exposing the UI via HTTPRoute**
+
+```yaml
+gatewayApi:
+  httpRoutes:
+    ui:
+      enabled: true
+      hostnames:
+        - sftpgo.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: istio-system
+          sectionName: http
+```
+
+**Example: Exposing the API via HTTPRoute**
+
+```yaml
+gatewayApi:
+  httpRoutes:
+    api:
+      enabled: true
+      hostnames:
+        - sftpgo-api.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: istio-system
+          sectionName: http
+      pathPrefix: /api
+```
+
+**Example: Exposing the WebDAV service via HTTPRoute**
+
+```yaml
+gatewayApi:
+  httpRoutes:
+    webdav:
+      enabled: true
+      hostnames:
+        - sftpgo-webdav.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: istio-system
+          sectionName: http
+```
+
+You can optionally customize the backend for each `HTTPRoute` (for example to change the `kind` or `weight`) via the `gatewayApi.httpRoutes.<route>.backend` object.
+
+#### TCPRoute for SFTP and FTP
+
+For TCP-based protocols like SFTP and FTP, you need to use `TCPRoute` instead of `HTTPRoute`:
+
+```yaml
+gatewayApi:
+  tcpRoutes:
+    sftp:
+      enabled: true
+      parentRefs:
+        - name: my-gateway
+          namespace: istio-system
+          sectionName: sftp
+    ftp:
+      enabled: true
+      parentRefs:
+        - name: my-gateway
+          namespace: istio-system
+          sectionName: ftp
+```
 {{ template "chart.valuesSection" . }}
 
 ## Attributions
