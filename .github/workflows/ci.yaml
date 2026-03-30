@@ -19,7 +19,7 @@ jobs:
 
       - name: Get Dagger version
         id: dagger_version
-        uses: sagikazarmark/dagger-version-action@v0.0.2
+        uses: sagikazarmark/dagger-version-action@v0.0.3
 
       - name: Run pipeline
         uses: dagger/dagger-for-github@27b130bf0f79a7f6fbbbe0fbca6760dc9bb40a77 # v8.4.1
@@ -50,7 +50,7 @@ jobs:
 
       - name: Get Dagger version
         id: dagger_version
-        uses: sagikazarmark/dagger-version-action@v0.0.2
+        uses: sagikazarmark/dagger-version-action@v0.0.3
 
       - name: Run pipeline
         uses: dagger/dagger-for-github@27b130bf0f79a7f6fbbbe0fbca6760dc9bb40a77 # v8.4.1
@@ -69,7 +69,7 @@ jobs:
 
       - name: Get Dagger version
         id: dagger_version
-        uses: sagikazarmark/dagger-version-action@v0.0.2
+        uses: sagikazarmark/dagger-version-action@v0.0.3
 
       - name: Run pipeline
         uses: dagger/dagger-for-github@27b130bf0f79a7f6fbbbe0fbca6760dc9bb40a77 # v8.4.1
