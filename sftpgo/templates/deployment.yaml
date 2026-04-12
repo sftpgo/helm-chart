@@ -57,7 +57,7 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default (printf "v%s" .Chart.AppVersion) }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default (printf "v%s%s" .Chart.AppVersion (ternary (printf "-%s" .Values.image.variant) "" (ne (.Values.image.variant | default "") ""))) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - sftpgo
@@ -185,21 +185,21 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      
+
       {{- $topologyConstraints := list -}}
-      
+
       {{- if kindIs "slice" .Values.topologySpreadConstraints }}
         {{- range $constraint := .Values.topologySpreadConstraints }}
           {{- if not $constraint.labelSelector }}
             {{- $_ := set $constraint "labelSelector" (dict "matchLabels" $selectorLabels) }}
           {{- end }}
           {{- $topologyConstraints = append $topologyConstraints $constraint -}}
-        {{- end }}  
+        {{- end }}
       {{- else if and (kindIs "map" .Values.topologySpreadConstraints) .Values.topologySpreadConstraints.enabled }}
         {{- $legacyConstraint := dict "maxSkew" (default 1 .Values.topologySpreadConstraints.maxSkew) "topologyKey" (default "topology.kubernetes.io/zone" .Values.topologySpreadConstraints.topologyKey) "whenUnsatisfiable" (default "DoNotSchedule" .Values.topologySpreadConstraints.whenUnsatisfiable) "labelSelector" (dict "matchLabels" $selectorLabels) -}}
         {{- $topologyConstraints = append $topologyConstraints $legacyConstraint -}}
       {{- end }}
-      
+
       {{- if not (empty $topologyConstraints) }}
       topologySpreadConstraints:
         {{- toYaml $topologyConstraints | nindent 8 }}
