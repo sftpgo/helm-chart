@@ -21,6 +21,10 @@ image:
   # -- Image tag override for the default value (chart appVersion).
   tag: ""
 
+  # -- Override the default image variant. Example: "distroless-slim".
+  # See the [official documentation](https://docs.sftpgo.com/latest/docker/#image-variants).
+  variant: ""
+
 # -- Reference to one or more secrets to be used when [pulling images](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret) (from private registries).
 imagePullSecrets: []
 
