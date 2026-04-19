@@ -1,0 +1,29 @@
+{{- if and .Values.sftpd.enabled .Values.gatewayApi.tcpRoutes.sftp.enabled -}}
+{{- $route := .Values.gatewayApi.tcpRoutes.sftp -}}
+{{- $backend := $route.backend | default dict -}}
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: {{ include "sftpgo.componentname" (list . "sftp") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sftpgo.labels" . | nindent 4 }}
+    {{- with $route.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with $route.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with $route.parentRefs }}
+  parentRefs:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    - backendRefs:
+        - kind: {{ $backend.kind | default "Service" }}
+          name: {{ $backend.name | default (include "sftpgo.fullname" .) }}
+          port: {{ $backend.port | default .Values.service.ports.sftp.port }}
+          weight: {{ $backend.weight | default 1 }}
+{{- end }}

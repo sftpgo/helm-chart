@@ -11,6 +11,12 @@ import (
 const (
 	helmVersion     = "4.1.1"
 	helmDocsVersion = "v1.14.2"
+
+	// Gateway API CRDs version. Installed into the test cluster so that
+	// HTTPRoute/TCPRoute scenarios can be rendered and applied. Bump as the
+	// upstream project releases new versions; see
+	// https://github.com/kubernetes-sigs/gateway-api/releases.
+	gatewayAPIVersion = "v1.5.1"
 )
 
 type Sftpgo struct {
@@ -111,6 +117,14 @@ func (m *Sftpgo) Test(
 		return err
 	}
 
+	// Install Gateway API CRDs so scenarios that create HTTPRoute/TCPRoute
+	// resources can be applied by helm. The experimental channel manifest
+	// exceeds kubectl client-side apply size limits, so server-side apply is
+	// required.
+	if err := installGatewayAPICRDs(ctx, k8s); err != nil {
+		return fmt.Errorf("install Gateway API CRDs: %w", err)
+	}
+
 	pkg := m.chart().Package().WithKubeconfigFile(k8s.Config())
 
 	for _, test := range tests {
@@ -192,4 +206,43 @@ func (m *Sftpgo) chart() *dagger.HelmChart {
 	chart = chart.WithFile("README.md", readme)
 
 	return dag.Helm(dagger.HelmOpts{Version: helmVersion}).Chart(chart)
+}
+
+// installGatewayAPICRDs installs the Gateway API experimental channel CRDs
+// into the given k3s cluster.
+//
+// Only the experimental channel is installed: it is a superset of standard
+// (HTTPRoute as v1 stable, TCPRoute/UDPRoute as v1alpha2). Since v1.5 the
+// standard channel ships a ValidatingAdmissionPolicy (safe-upgrades) that
+// blocks installing experimental CRDs on top of standard ones, so the two
+// cannot be applied side-by-side.
+//
+// Server-side apply is required because the experimental manifest exceeds the
+// client-side apply size limit.
+func installGatewayAPICRDs(ctx context.Context, k8s *dagger.K3S) error {
+	manifestURL := fmt.Sprintf(
+		"https://github.com/kubernetes-sigs/gateway-api/releases/download/%s/experimental-install.yaml",
+		gatewayAPIVersion,
+	)
+
+	ctr := dag.Container().
+		From("bitnami/kubectl").
+		WithoutEntrypoint().
+		WithServiceBinding("k3s", k8s.Server()).
+		WithFile("/.kube/config", k8s.Config(), dagger.ContainerWithFileOpts{Permissions: 1001}).
+		WithEnvVariable("KUBECONFIG", "/.kube/config").
+		WithUser("1001").
+		WithExec([]string{"kubectl", "apply", "--server-side=true", "-f", manifestURL})
+
+	for _, crd := range []string{
+		"httproutes.gateway.networking.k8s.io",
+		"tcproutes.gateway.networking.k8s.io",
+	} {
+		ctr = ctr.WithExec([]string{
+			"kubectl", "wait", "--for=condition=established", "--timeout=60s", "crd/" + crd,
+		})
+	}
+
+	_, err := ctr.Sync(ctx)
+	return err
 }

@@ -1,0 +1,43 @@
+{{- if and .Values.httpd.enabled .Values.gatewayApi.httpRoutes.ui.enabled -}}
+{{- $route := .Values.gatewayApi.httpRoutes.ui -}}
+{{- $backend := $route.backend | default dict -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "sftpgo.componentname" (list . "ui") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sftpgo.labels" . | nindent 4 }}
+    {{- with $route.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with $route.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with $route.parentRefs }}
+  parentRefs:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $route.hostnames }}
+  hostnames:
+    {{- range . }}
+    - {{ . | quote }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ $route.pathPrefix | default "/" | quote }}
+      {{- with $route.filters }}
+      filters:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      backendRefs:
+        - kind: {{ $backend.kind | default "Service" }}
+          name: {{ $backend.name | default (include "sftpgo.fullname" .) }}
+          port: {{ $backend.port | default .Values.service.ports.http.port }}
+          weight: {{ $backend.weight | default 1 }}
+{{- end }}

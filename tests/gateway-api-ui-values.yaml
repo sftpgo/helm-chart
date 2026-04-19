@@ -1,0 +1,13 @@
+httpd:
+  enabled: true
+
+gatewayApi:
+  httpRoutes:
+    ui:
+      enabled: true
+      hostnames:
+        - sftpgo.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: gateway-system
+          sectionName: https
