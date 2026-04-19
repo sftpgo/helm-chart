@@ -1,0 +1,45 @@
+httpd:
+  enabled: true
+sftpd:
+  enabled: true
+ftpd:
+  enabled: true
+webdavd:
+  enabled: true
+
+gatewayApi:
+  httpRoutes:
+    ui:
+      enabled: true
+      hostnames:
+        - sftpgo.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: gateway-system
+    api:
+      enabled: true
+      hostnames:
+        - api.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: gateway-system
+    webdav:
+      enabled: true
+      hostnames:
+        - dav.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: gateway-system
+  tcpRoutes:
+    sftp:
+      enabled: true
+      parentRefs:
+        - name: my-gateway
+          namespace: gateway-system
+          sectionName: sftp
+    ftp:
+      enabled: true
+      parentRefs:
+        - name: my-gateway
+          namespace: gateway-system
+          sectionName: ftp

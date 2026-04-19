@@ -93,6 +93,106 @@ services:
 Additional services accept the same options as the `service` option in the values file and
 require at least one port.
 
+### Gateway API
+
+The chart can expose SFTPGo via [Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/) resources
+in addition to (or instead of) Ingress. `HTTPRoute` is used for UI, REST API and WebDAV; `TCPRoute`
+is used for SFTP and FTP.
+
+**Prerequisites**
+
+- A `Gateway` resource must already be configured in the cluster. The chart only creates `*Route`
+  resources and attaches them to an existing Gateway via `parentRefs`.
+- `HTTPRoute` is part of the Gateway API **standard** channel (GA in `gateway.networking.k8s.io/v1`,
+  Gateway API v1.0, October 2023). Any conformant controller supports it.
+- `TCPRoute` is only available in the Gateway API **experimental** channel (`v1alpha2`). The
+  experimental CRDs must be installed in the cluster, and the controller must support TCPRoute.
+  Controller support varies: for example Istio and Envoy Gateway support it; some controllers
+  (e.g. upstream Nginx Gateway Fabric) do not.
+
+**Path-prefix semantics**
+
+Understanding how SFTPGo serves its different surfaces helps pick the right `pathPrefix` and
+filters:
+
+| Surface | Served at | Notes |
+|---------|-----------|-------|
+| Web UI (admin + client) | `{httpd.web_root}/web/...` | Static asset URLs are rewritten by SFTPGo to include `web_root`, so the external path must match. Set `pathPrefix` equal to `httpd.web_root` (default `/`). |
+| REST API | `/api/v2/...` | Always at `/api`, regardless of `web_root`. To expose the API at a different external prefix, set `pathPrefix` and add a `URLRewrite` filter (see below). |
+| WebDAV | `{webdavd.bindings[].prefix}/...` | Similar to UI: set `pathPrefix` to match the configured binding prefix (default `/`). |
+
+**Example: UI and API behind the same Gateway**
+
+```yaml
+httpd:
+  enabled: true
+
+gatewayApi:
+  httpRoutes:
+    ui:
+      enabled: true
+      hostnames:
+        - sftpgo.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: gateway-system
+          sectionName: https
+      # pathPrefix defaults to "/" — matches the default httpd.web_root
+    api:
+      enabled: true
+      hostnames:
+        - sftpgo.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: gateway-system
+          sectionName: https
+      # pathPrefix defaults to "/api" — no rewrite needed
+```
+
+**Example: API exposed at a custom external prefix via URLRewrite**
+
+SFTPGo does not apply `web_root` to the REST API, so to expose it at `/sftpgo/api` externally you
+need to strip the `/sftpgo` prefix before the request reaches the backend:
+
+```yaml
+gatewayApi:
+  httpRoutes:
+    api:
+      enabled: true
+      hostnames:
+        - gw.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: gateway-system
+      pathPrefix: /sftpgo/api
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /api
+```
+
+**Example: SFTP via TCPRoute**
+
+```yaml
+sftpd:
+  enabled: true
+
+gatewayApi:
+  tcpRoutes:
+    sftp:
+      enabled: true
+      parentRefs:
+        - name: my-gateway
+          namespace: gateway-system
+          sectionName: sftp
+```
+
+Note: for FTP, only the control port is routed. Passive data ports (`service.ports.ftp.passiveRange`)
+require separate handling (typically a dedicated `LoadBalancer` Service) because Gateway API does
+not model port ranges.
+
 ## Values
 
 | Key | Type | Default | Description |
@@ -116,6 +216,41 @@ require at least one port.
 | ftpd.enabled | bool | `false` | Enable FTP service. |
 | ftpd.port | int | `2021` | Container FTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting. |
 | fullnameOverride | string | `""` | A name to substitute for the full names of resources. |
+| gatewayApi | object | `{"httpRoutes":{"api":{"annotations":{},"backend":{},"enabled":false,"filters":[],"hostnames":[],"labels":{},"parentRefs":[],"pathPrefix":"/api"},"ui":{"annotations":{},"backend":{},"enabled":false,"filters":[],"hostnames":[],"labels":{},"parentRefs":[],"pathPrefix":"/"},"webdav":{"annotations":{},"backend":{},"enabled":false,"filters":[],"hostnames":[],"labels":{},"parentRefs":[],"pathPrefix":"/"}},"tcpRoutes":{"ftp":{"annotations":{},"backend":{},"enabled":false,"labels":{},"parentRefs":[]},"sftp":{"annotations":{},"backend":{},"enabled":false,"labels":{},"parentRefs":[]}}}` | [Gateway API](https://gateway-api.sigs.k8s.io/) routes configuration. HTTPRoute is part of the Gateway API standard channel (GA in v1). TCPRoute requires the experimental channel CRDs to be installed in the cluster. See the README for compatibility details and path-prefix semantics. |
+| gatewayApi.httpRoutes.api.annotations | object | `{}` | Annotations to be added to the API HTTPRoute. |
+| gatewayApi.httpRoutes.api.backend | object | `{}` | Backend override. Defaults to the main chart Service on the HTTP port. Accepted keys: `kind`, `name`, `port`, `weight`. |
+| gatewayApi.httpRoutes.api.enabled | bool | `false` | Enable [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) for the REST API. |
+| gatewayApi.httpRoutes.api.filters | list | `[]` | [Filters](https://gateway-api.sigs.k8s.io/api-types/httproute/#filters-optional) applied to the route (e.g. URLRewrite, RequestHeaderModifier). Passed through verbatim. |
+| gatewayApi.httpRoutes.api.hostnames | list | `[]` | Hostnames for the API HTTPRoute. Leave empty to match any hostname accepted by the parent Gateway. |
+| gatewayApi.httpRoutes.api.labels | object | `{}` | Labels to be added to the API HTTPRoute. |
+| gatewayApi.httpRoutes.api.parentRefs | list | `[]` | ParentRefs for the API HTTPRoute. At least one entry is required for the route to be attached to a Gateway. |
+| gatewayApi.httpRoutes.api.pathPrefix | string | `"/api"` | Path prefix for the API route. The REST API is always served at `/api` by SFTPGo (not affected by `httpd.web_root`). Use a custom prefix together with a `URLRewrite` filter if you need a different external path. |
+| gatewayApi.httpRoutes.ui.annotations | object | `{}` | Annotations to be added to the UI HTTPRoute. |
+| gatewayApi.httpRoutes.ui.backend | object | `{}` | Backend override. Defaults to the main chart Service on the HTTP port. Accepted keys: `kind`, `name`, `port`, `weight`. |
+| gatewayApi.httpRoutes.ui.enabled | bool | `false` | Enable [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) for the web UI. |
+| gatewayApi.httpRoutes.ui.filters | list | `[]` | [Filters](https://gateway-api.sigs.k8s.io/api-types/httproute/#filters-optional) applied to the route (e.g. URLRewrite, RequestHeaderModifier). Passed through verbatim. |
+| gatewayApi.httpRoutes.ui.hostnames | list | `[]` | Hostnames for the UI HTTPRoute. Leave empty to match any hostname accepted by the parent Gateway. |
+| gatewayApi.httpRoutes.ui.labels | object | `{}` | Labels to be added to the UI HTTPRoute. |
+| gatewayApi.httpRoutes.ui.parentRefs | list | `[]` | ParentRefs for the UI HTTPRoute. At least one entry is required for the route to be attached to a Gateway. |
+| gatewayApi.httpRoutes.ui.pathPrefix | string | `"/"` | Path prefix for the UI route. Should match the `httpd.web_root` configured in SFTPGo (default `/`). |
+| gatewayApi.httpRoutes.webdav.annotations | object | `{}` | Annotations to be added to the WebDAV HTTPRoute. |
+| gatewayApi.httpRoutes.webdav.backend | object | `{}` | Backend override. Defaults to the main chart Service on the WebDAV port. Accepted keys: `kind`, `name`, `port`, `weight`. |
+| gatewayApi.httpRoutes.webdav.enabled | bool | `false` | Enable [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) for WebDAV. |
+| gatewayApi.httpRoutes.webdav.filters | list | `[]` | [Filters](https://gateway-api.sigs.k8s.io/api-types/httproute/#filters-optional) applied to the route (e.g. URLRewrite, RequestHeaderModifier). Passed through verbatim. |
+| gatewayApi.httpRoutes.webdav.hostnames | list | `[]` | Hostnames for the WebDAV HTTPRoute. Leave empty to match any hostname accepted by the parent Gateway. |
+| gatewayApi.httpRoutes.webdav.labels | object | `{}` | Labels to be added to the WebDAV HTTPRoute. |
+| gatewayApi.httpRoutes.webdav.parentRefs | list | `[]` | ParentRefs for the WebDAV HTTPRoute. At least one entry is required for the route to be attached to a Gateway. |
+| gatewayApi.httpRoutes.webdav.pathPrefix | string | `"/"` | Path prefix for the WebDAV route. Should match the WebDAV binding prefix configured in SFTPGo (default `/`). |
+| gatewayApi.tcpRoutes.ftp.annotations | object | `{}` | Annotations to be added to the FTP TCPRoute. |
+| gatewayApi.tcpRoutes.ftp.backend | object | `{}` | Backend override. Defaults to the main chart Service on the FTP control port. Accepted keys: `kind`, `name`, `port`, `weight`. |
+| gatewayApi.tcpRoutes.ftp.enabled | bool | `false` | Enable [TCPRoute](https://gateway-api.sigs.k8s.io/api-types/tcproute/) for FTP. Requires the Gateway API experimental channel CRDs. Only routes the FTP control port; passive data ports are not handled. |
+| gatewayApi.tcpRoutes.ftp.labels | object | `{}` | Labels to be added to the FTP TCPRoute. |
+| gatewayApi.tcpRoutes.ftp.parentRefs | list | `[]` | ParentRefs for the FTP TCPRoute. At least one entry is required for the route to be attached to a Gateway. |
+| gatewayApi.tcpRoutes.sftp.annotations | object | `{}` | Annotations to be added to the SFTP TCPRoute. |
+| gatewayApi.tcpRoutes.sftp.backend | object | `{}` | Backend override. Defaults to the main chart Service on the SFTP port. Accepted keys: `kind`, `name`, `port`, `weight`. |
+| gatewayApi.tcpRoutes.sftp.enabled | bool | `false` | Enable [TCPRoute](https://gateway-api.sigs.k8s.io/api-types/tcproute/) for SFTP. Requires the Gateway API experimental channel CRDs. |
+| gatewayApi.tcpRoutes.sftp.labels | object | `{}` | Labels to be added to the SFTP TCPRoute. |
+| gatewayApi.tcpRoutes.sftp.parentRefs | list | `[]` | ParentRefs for the SFTP TCPRoute. At least one entry is required for the route to be attached to a Gateway. |
 | hostNetwork | bool | `false` | Run pods in the host network of nodes. Warning: The use of host network is [discouraged](https://kubernetes.io/docs/concepts/configuration/overview/#services). Make sure to use it only when absolutely necessary. |
 | httpd.enabled | bool | `true` | Enable HTTP service. |
 | httpd.port | int | `8080` | Container HTTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting. |

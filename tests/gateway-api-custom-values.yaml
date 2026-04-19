@@ -1,0 +1,35 @@
+httpd:
+  enabled: true
+
+gatewayApi:
+  httpRoutes:
+    ui:
+      enabled: true
+      hostnames:
+        - sftpgo.example.com
+      parentRefs:
+        - name: my-gateway
+      pathPrefix: /myroot
+      labels:
+        custom.example.com/team: platform
+      annotations:
+        cert-manager.io/issuer: letsencrypt
+      filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            add:
+              - name: X-Forwarded-Prefix
+                value: /myroot
+    api:
+      enabled: true
+      hostnames:
+        - gw.example.com
+      parentRefs:
+        - name: my-gateway
+      pathPrefix: /sftpgo/api
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /api
