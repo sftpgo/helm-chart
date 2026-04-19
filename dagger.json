@@ -1,6 +1,6 @@
 {
   "name": "sftpgo",
-  "engineVersion": "v0.20.0",
+  "engineVersion": "v0.20.2",
   "sdk": {
     "source": "go"
   },
