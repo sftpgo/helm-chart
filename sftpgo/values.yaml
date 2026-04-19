@@ -424,6 +424,115 @@ persistence:
         storage: 5Gi
     storageClassName: ""
 
+gatewayApi:
+  httpRoutes:
+    ui:
+      # -- Enable [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) for the UI.
+      enabled: false
+      # -- Annotations to be added to the UI HTTPRoute.
+      annotations: {}
+      # -- Labels to be added to the UI HTTPRoute.
+      labels: {}
+      # -- Hostnames for the UI HTTPRoute.
+      hostnames:
+        - chart-example.local
+      # -- ParentRefs for the UI HTTPRoute.
+      parentRefs: []
+      # Example:
+      # parentRefs:
+      # - group: gateway.networking.k8s.io
+      #   kind: Gateway
+      #   name: gateway
+      #   namespace: istio-ingress
+      #   sectionName: default-443
+      
+      # -- Optional backend configuration
+      # backend:
+      #   kind: Service
+      #   weight: 1
+
+    api:
+      # -- Enable [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) for the API.
+      enabled: false
+      # -- Annotations to be added to the API HTTPRoute.
+      annotations: {}
+      # -- Labels to be added to the API HTTPRoute.
+      labels: {}
+      # -- Hostnames for the API HTTPRoute.
+      hostnames:
+        - chart-example.local
+      # -- ParentRefs for the API HTTPRoute.
+      parentRefs: []
+      # Example:
+      # parentRefs:
+      # - group: gateway.networking.k8s.io
+      #   kind: Gateway
+      #   name: gateway
+      #   namespace: istio-ingress
+      #   sectionName: default-443
+      # -- Path prefix for the API route.
+      pathPrefix: /api
+      # -- Optional backend configuration
+      # backend:
+      #   kind: Service
+      #   weight: 1
+
+    webdav:
+      # -- Enable [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) for the WebDAV service.
+      enabled: false
+      # -- Annotations to be added to the WebDAV HTTPRoute.
+      annotations: {}
+      # -- Labels to be added to the WebDAV HTTPRoute.
+      labels: {}
+      # -- Hostnames for the WebDAV HTTPRoute.
+      hostnames:
+        - chart-example.local
+      # -- ParentRefs for the WebDAV HTTPRoute.
+      parentRefs: []
+      # Example:
+      # parentRefs:
+      # - group: gateway.networking.k8s.io
+      #   kind: Gateway
+      #   name: gateway
+      #   namespace: istio-ingress
+      #   sectionName: default-443
+      # -- Optional backend configuration
+      # backend:
+      #   kind: Service
+      #   weight: 1
+
+  tcpRoutes:
+# Note: TCPRoute currently uses the v1alpha2 Gateway API. Make sure experimental Gateway API CRDs/APIs
+# are installed and enabled in your cluster before enabling any Gateway API TCP routes.
+    sftp:
+      # -- Enable TCPRoute for SFTP.
+      enabled: false
+      # -- Annotations to be added to the SFTP TCPRoute.
+      annotations: {}
+      # -- Labels to be added to the SFTP TCPRoute.
+      labels: {}
+      # -- ParentRefs for the SFTP TCPRoute.
+      parentRefs: []
+      # Example:
+      # parentRefs:
+      #   - name: my-gateway
+      #     namespace: gateway-namespace
+      #     sectionName: sftp
+    ftp:
+      # -- Enable TCPRoute for FTP.
+      enabled: false
+      # -- Annotations to be added to the FTP TCPRoute.
+      annotations: {}
+      # -- Labels to be added to the FTP TCPRoute.
+      labels: {}
+      # -- ParentRefs for the FTP TCPRoute.
+      parentRefs: []
+      # Example:
+      # parentRefs:
+      #   - name: my-gateway
+      #     namespace: gateway-namespace
+      #     sectionName: ftp
+
 # -- Prometheus PodMonitor configuration.
 # See the [Prometheus Operator documentation](https://prometheus-operator.dev/docs/operator/api/#monitoring.coreos.com/v1.PodMonitor) for details.
 podMonitor:
