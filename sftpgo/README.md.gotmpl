@@ -94,6 +94,106 @@ services:
 Additional services accept the same options as the `service` option in the values file and
 require at least one port.
 
+### Gateway API
+
+The chart can expose SFTPGo via [Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/) resources
+in addition to (or instead of) Ingress. `HTTPRoute` is used for UI, REST API and WebDAV; `TCPRoute`
+is used for SFTP and FTP.
+
+**Prerequisites**
+
+- A `Gateway` resource must already be configured in the cluster. The chart only creates `*Route`
+  resources and attaches them to an existing Gateway via `parentRefs`.
+- `HTTPRoute` is part of the Gateway API **standard** channel (GA in `gateway.networking.k8s.io/v1`,
+  Gateway API v1.0, October 2023). Any conformant controller supports it.
+- `TCPRoute` is only available in the Gateway API **experimental** channel (`v1alpha2`). The
+  experimental CRDs must be installed in the cluster, and the controller must support TCPRoute.
+  Controller support varies: for example Istio and Envoy Gateway support it; some controllers
+  (e.g. upstream Nginx Gateway Fabric) do not.
+
+**Path-prefix semantics**
+
+Understanding how SFTPGo serves its different surfaces helps pick the right `pathPrefix` and
+filters:
+
+| Surface | Served at | Notes |
+|---------|-----------|-------|
+| Web UI (admin + client) | `{httpd.web_root}/web/...` | Static asset URLs are rewritten by SFTPGo to include `web_root`, so the external path must match. Set `pathPrefix` equal to `httpd.web_root` (default `/`). |
+| REST API | `/api/v2/...` | Always at `/api`, regardless of `web_root`. To expose the API at a different external prefix, set `pathPrefix` and add a `URLRewrite` filter (see below). |
+| WebDAV | `{webdavd.bindings[].prefix}/...` | Similar to UI: set `pathPrefix` to match the configured binding prefix (default `/`). |
+
+**Example: UI and API behind the same Gateway**
+
+```yaml
+httpd:
+  enabled: true
+
+gatewayApi:
+  httpRoutes:
+    ui:
+      enabled: true
+      hostnames:
+        - sftpgo.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: gateway-system
+          sectionName: https
+      # pathPrefix defaults to "/" — matches the default httpd.web_root
+    api:
+      enabled: true
+      hostnames:
+        - sftpgo.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: gateway-system
+          sectionName: https
+      # pathPrefix defaults to "/api" — no rewrite needed
+```
+
+**Example: API exposed at a custom external prefix via URLRewrite**
+
+SFTPGo does not apply `web_root` to the REST API, so to expose it at `/sftpgo/api` externally you
+need to strip the `/sftpgo` prefix before the request reaches the backend:
+
+```yaml
+gatewayApi:
+  httpRoutes:
+    api:
+      enabled: true
+      hostnames:
+        - gw.example.com
+      parentRefs:
+        - name: my-gateway
+          namespace: gateway-system
+      pathPrefix: /sftpgo/api
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /api
+```
+
+**Example: SFTP via TCPRoute**
+
+```yaml
+sftpd:
+  enabled: true
+
+gatewayApi:
+  tcpRoutes:
+    sftp:
+      enabled: true
+      parentRefs:
+        - name: my-gateway
+          namespace: gateway-system
+          sectionName: sftp
+```
+
+Note: for FTP, only the control port is routed. Passive data ports (`service.ports.ftp.passiveRange`)
+require separate handling (typically a dedicated `LoadBalancer` Service) because Gateway API does
+not model port ranges.
+
 {{ template "chart.valuesSection" . }}
 
 ## Attributions

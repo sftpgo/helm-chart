@@ -443,3 +443,132 @@ podMonitor:
 
   # -- Scrape timeout (e.g., 10s).
   scrapeTimeout: 10s
+
+# -- [Gateway API](https://gateway-api.sigs.k8s.io/) routes configuration.
+# HTTPRoute is part of the Gateway API standard channel (GA in v1).
+# TCPRoute requires the experimental channel CRDs to be installed in the cluster.
+# See the README for compatibility details and path-prefix semantics.
+gatewayApi:
+  httpRoutes:
+    ui:
+      # -- Enable [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) for the web UI.
+      enabled: false
+
+      # -- Annotations to be added to the UI HTTPRoute.
+      annotations: {}
+
+      # -- Labels to be added to the UI HTTPRoute.
+      labels: {}
+
+      # -- Hostnames for the UI HTTPRoute. Leave empty to match any hostname accepted by the parent Gateway.
+      hostnames: []
+        # - sftpgo.example.com
+
+      # -- ParentRefs for the UI HTTPRoute. At least one entry is required for the route to be attached to a Gateway.
+      parentRefs: []
+        # - name: my-gateway
+        #   namespace: gateway-namespace
+        #   sectionName: http
+
+      # -- Path prefix for the UI route. Should match the `httpd.web_root` configured in SFTPGo (default `/`).
+      pathPrefix: /
+
+      # -- [Filters](https://gateway-api.sigs.k8s.io/api-types/httproute/#filters-optional) applied to the route (e.g. URLRewrite, RequestHeaderModifier). Passed through verbatim.
+      filters: []
+        # - type: URLRewrite
+        #   urlRewrite:
+        #     path:
+        #       type: ReplacePrefixMatch
+        #       replacePrefixMatch: /
+
+      # -- Backend override. Defaults to the main chart Service on the HTTP port. Accepted keys: `kind`, `name`, `port`, `weight`.
+      backend: {}
+        # name: my-external-service
+        # port: 8080
+        # weight: 1
+
+    api:
+      # -- Enable [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) for the REST API.
+      enabled: false
+
+      # -- Annotations to be added to the API HTTPRoute.
+      annotations: {}
+
+      # -- Labels to be added to the API HTTPRoute.
+      labels: {}
+
+      # -- Hostnames for the API HTTPRoute. Leave empty to match any hostname accepted by the parent Gateway.
+      hostnames: []
+
+      # -- ParentRefs for the API HTTPRoute. At least one entry is required for the route to be attached to a Gateway.
+      parentRefs: []
+
+      # -- Path prefix for the API route. The REST API is always served at `/api` by SFTPGo (not affected by `httpd.web_root`). Use a custom prefix together with a `URLRewrite` filter if you need a different external path.
+      pathPrefix: /api
+
+      # -- [Filters](https://gateway-api.sigs.k8s.io/api-types/httproute/#filters-optional) applied to the route (e.g. URLRewrite, RequestHeaderModifier). Passed through verbatim.
+      filters: []
+
+      # -- Backend override. Defaults to the main chart Service on the HTTP port. Accepted keys: `kind`, `name`, `port`, `weight`.
+      backend: {}
+
+    webdav:
+      # -- Enable [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) for WebDAV.
+      enabled: false
+
+      # -- Annotations to be added to the WebDAV HTTPRoute.
+      annotations: {}
+
+      # -- Labels to be added to the WebDAV HTTPRoute.
+      labels: {}
+
+      # -- Hostnames for the WebDAV HTTPRoute. Leave empty to match any hostname accepted by the parent Gateway.
+      hostnames: []
+
+      # -- ParentRefs for the WebDAV HTTPRoute. At least one entry is required for the route to be attached to a Gateway.
+      parentRefs: []
+
+      # -- Path prefix for the WebDAV route. Should match the WebDAV binding prefix configured in SFTPGo (default `/`).
+      pathPrefix: /
+
+      # -- [Filters](https://gateway-api.sigs.k8s.io/api-types/httproute/#filters-optional) applied to the route (e.g. URLRewrite, RequestHeaderModifier). Passed through verbatim.
+      filters: []
+
+      # -- Backend override. Defaults to the main chart Service on the WebDAV port. Accepted keys: `kind`, `name`, `port`, `weight`.
+      backend: {}
+
+  tcpRoutes:
+    sftp:
+      # -- Enable [TCPRoute](https://gateway-api.sigs.k8s.io/api-types/tcproute/) for SFTP. Requires the Gateway API experimental channel CRDs.
+      enabled: false
+
+      # -- Annotations to be added to the SFTP TCPRoute.
+      annotations: {}
+
+      # -- Labels to be added to the SFTP TCPRoute.
+      labels: {}
+
+      # -- ParentRefs for the SFTP TCPRoute. At least one entry is required for the route to be attached to a Gateway.
+      parentRefs: []
+        # - name: my-gateway
+        #   namespace: gateway-namespace
+        #   sectionName: sftp
+
+      # -- Backend override. Defaults to the main chart Service on the SFTP port. Accepted keys: `kind`, `name`, `port`, `weight`.
+      backend: {}
+
+    ftp:
+      # -- Enable [TCPRoute](https://gateway-api.sigs.k8s.io/api-types/tcproute/) for FTP. Requires the Gateway API experimental channel CRDs. Only routes the FTP control port; passive data ports are not handled.
+      enabled: false
+
+      # -- Annotations to be added to the FTP TCPRoute.
+      annotations: {}
+
+      # -- Labels to be added to the FTP TCPRoute.
+      labels: {}
+
+      # -- ParentRefs for the FTP TCPRoute. At least one entry is required for the route to be attached to a Gateway.
+      parentRefs: []
+
+      # -- Backend override. Defaults to the main chart Service on the FTP control port. Accepted keys: `kind`, `name`, `port`, `weight`.
+      backend: {}
