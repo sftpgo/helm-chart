@@ -121,7 +121,8 @@ require at least one port.
 | httpd.port | int | `8080` | Container HTTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting. |
 | image.pullPolicy | string | `"IfNotPresent"` | [Image pull policy](https://kubernetes.io/docs/concepts/containers/images/#updating-images) for updating already existing images on a node. |
 | image.repository | string | `"ghcr.io/drakkan/sftpgo"` | Name of the image repository to pull the container image from. |
-| image.tag | string | `""` | Image tag override for the default value (chart appVersion). |
+| image.tag | string | `""` | Image tag override for the default value (chart appVersion). When set, it replaces the whole tag and `image.variant` is ignored. |
+| image.variant | string | `""` | Override the default image variant. Example: "distroless-slim". Ignored when `image.tag` is set. See the [official documentation](https://docs.sftpgo.com/latest/docker/#image-variants). |
 | imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when [pulling images](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret) (from private registries). |
 | initContainers | list | `[]` | Add [init containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) to the pod. |
 | nameOverride | string | `""` | A name in place of the chart name for `app:` labels. |

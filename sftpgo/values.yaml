@@ -18,10 +18,10 @@ image:
   # -- [Image pull policy](https://kubernetes.io/docs/concepts/containers/images/#updating-images) for updating already existing images on a node.
   pullPolicy: IfNotPresent
 
-  # -- Image tag override for the default value (chart appVersion).
+  # -- Image tag override for the default value (chart appVersion). When set, it replaces the whole tag and `image.variant` is ignored.
   tag: ""
 
-  # -- Override the default image variant. Example: "distroless-slim".
+  # -- Override the default image variant. Example: "distroless-slim". Ignored when `image.tag` is set.
   # See the [official documentation](https://docs.sftpgo.com/latest/docker/#image-variants).
   variant: ""
 
