@@ -53,11 +53,13 @@ spec:
       initContainers:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- $variantSuffix := "" -}}
+      {{- with .Values.image.variant }}{{ $variantSuffix = printf "-%s" . }}{{ end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default (printf "v%s%s" .Chart.AppVersion (ternary (printf "-%s" .Values.image.variant) "" (ne (.Values.image.variant | default "") ""))) }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default (printf "v%s%s" .Chart.AppVersion $variantSuffix) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - sftpgo
