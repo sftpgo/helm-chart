@@ -293,14 +293,18 @@ not model port ranges.
 | service.labels | object | `{}` | labels to be added to the service. |
 | service.loadBalancerIP | string | `nil` | Only applies when the service type is LoadBalancer. Load balancer will get created with the IP specified in this field. |
 | service.loadBalancerSourceRanges | list | `[]` | If specified (and supported by the cloud provider), traffic through the load balancer will be restricted to the specified client IPs. Valid values are IP CIDR blocks. |
+| service.ports.ftp.enabled | bool | `true` | Enable FTP port. |
 | service.ports.ftp.nodePort | int | `nil` | FTP node port (when applicable). |
 | service.ports.ftp.passiveRange.end | int | `50020` | FTP passive range end port. |
 | service.ports.ftp.passiveRange.start | int | `50000` | FTP passive range start port. |
 | service.ports.ftp.port | int | `21` | FTP service port. |
+| service.ports.http.enabled | bool | `true`| Enable FTP port. |
 | service.ports.http.nodePort | int | `nil` | REST API node port (when applicable). |
 | service.ports.http.port | int | `80` | REST API service port. |
+| service.ports.sftp.enabled | int | `true` | Enable SFTP port. |
 | service.ports.sftp.nodePort | int | `nil` | SFTP node port (when applicable). |
 | service.ports.sftp.port | int | `22` | SFTP service port. |
+| service.ports.webdav.enabled | int | `true` | Enable WebDAV port. |
 | service.ports.webdav.nodePort | int | `nil` | WebDAV node port (when applicable). |
 | service.ports.webdav.port | int | `81` | WebDAV service port. |
 | service.sessionAffinity | string | `nil` | Enable client IP based session affinity. [More info](https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies) |
