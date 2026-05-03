@@ -131,9 +131,15 @@ spec:
               containerPort: 10000
               protocol: TCP
             {{- range $name, $port := .Values.additionalPorts }}
+            {{- $exposeOnContainer := true }}
+            {{- if hasKey $port "exposeOnContainer" }}
+            {{- $exposeOnContainer = $port.exposeOnContainer }}
+            {{- end }}
+            {{- if $exposeOnContainer }}
             - name: {{ $name }}
               containerPort: {{ $port.containerPort }}
               protocol: TCP
+            {{- end }}
             {{- end }}
           livenessProbe:
             httpGet:
