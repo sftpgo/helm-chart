@@ -1,6 +1,6 @@
 {
   "name": "sftpgo",
-  "engineVersion": "v0.20.7",
+  "engineVersion": "v0.21.3",
   "sdk": {
     "source": "go"
   },
@@ -8,12 +8,12 @@
     {
       "name": "helm",
       "source": "github.com/sagikazarmark/daggerverse/helm@main",
-      "pin": "5f2dc1bd1014cf79757f4605f2f731ed962d4da7"
+      "pin": "81b688189377135bd0cf85f3ddba88c4fbb52c2d"
     },
     {
       "name": "helm-docs",
       "source": "github.com/sagikazarmark/daggerverse/helm-docs@main",
-      "pin": "5f2dc1bd1014cf79757f4605f2f731ed962d4da7"
+      "pin": "81b688189377135bd0cf85f3ddba88c4fbb52c2d"
     },
     {
       "name": "k3s",
@@ -23,7 +23,7 @@
     {
       "name": "registry",
       "source": "github.com/sagikazarmark/daggerverse/registry@main",
-      "pin": "5f2dc1bd1014cf79757f4605f2f731ed962d4da7"
+      "pin": "81b688189377135bd0cf85f3ddba88c4fbb52c2d"
     }
   ],
   "source": ".dagger",
