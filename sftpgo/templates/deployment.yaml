@@ -61,6 +61,10 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default (printf "v%s%s" .Chart.AppVersion $variantSuffix) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.lifecycleHooks }}
+          lifecycleHooks:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
           args:
             - sftpgo
             - serve
