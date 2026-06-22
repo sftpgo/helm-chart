@@ -260,6 +260,7 @@ not model port ranges.
 | image.variant | string | `""` | Override the default image variant. Example: "distroless-slim". Ignored when `image.tag` is set. See the [official documentation](https://docs.sftpgo.com/latest/docker/#image-variants). |
 | imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when [pulling images](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret) (from private registries). |
 | initContainers | list | `[]` | Add [init containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) to the pod. |
+| lifecycle | object | `{}` | Container [lifecycle hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/). |
 | nameOverride | string | `""` | A name in place of the chart name for `app:` labels. |
 | networkPolicy | object | `{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]}` | [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) configuration. |
 | networkPolicy.egress | list | `[]` | Egress rules. |
