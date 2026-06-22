@@ -36,9 +36,10 @@ jobs:
       matrix:
         k3s:
           - latest
-          - v1.35.3-k3s1
-          - v1.34.6-k3s1
-          - v1.33.10-k3s1
+          - v1.36.1-k3s1
+          - v1.35.5-k3s1
+          - v1.34.8-k3s1
+          - v1.33.12-k3s1
 
     steps:
       - name: Checkout repository
