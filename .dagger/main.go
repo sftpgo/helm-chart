@@ -225,6 +225,15 @@ func installGatewayAPICRDs(ctx context.Context, k8s *dagger.K3S) error {
 		gatewayAPIVersion,
 	)
 
+	// Server-side apply downloads the OpenAPI schema from the API server. On a
+	// freshly started cluster the OpenAPI aggregation endpoint may briefly be
+	// unavailable, occasionally making the apply fail with "failed to download
+	// openapi". Retry a few times to ride out that transient window.
+	applyScript := `for i in $(seq 1 5); do ` +
+		`kubectl apply --server-side=true -f "$0" && exit 0; ` +
+		`echo "gateway API apply attempt $i failed, retrying..."; sleep 5; ` +
+		`done; exit 1`
+
 	ctr := dag.Container().
 		From("bitnami/kubectl").
 		WithoutEntrypoint().
@@ -232,7 +241,7 @@ func installGatewayAPICRDs(ctx context.Context, k8s *dagger.K3S) error {
 		WithFile("/.kube/config", k8s.Config(), dagger.ContainerWithFileOpts{Permissions: 1001}).
 		WithEnvVariable("KUBECONFIG", "/.kube/config").
 		WithUser("1001").
-		WithExec([]string{"kubectl", "apply", "--server-side=true", "-f", manifestURL})
+		WithExec([]string{"sh", "-c", applyScript, manifestURL})
 
 	for _, crd := range []string{
 		"httproutes.gateway.networking.k8s.io",
