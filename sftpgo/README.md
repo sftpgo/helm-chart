@@ -53,7 +53,7 @@ metadata:
 data:
   sftpgo.yaml: |-
     sftpd:
-        max_auth_retries: 10
+        max_auth_tries: 10
 ```
 
 ```yaml
