@@ -193,6 +193,8 @@ service:
 
   ports:
     sftp:
+      # -- Enable SFTP service port.
+      enabled: true
       # -- SFTP service port.
       port: 22
 
@@ -200,6 +202,8 @@ service:
       nodePort:
 
     ftp:
+      # -- Enable FTP service port.
+      enabled: true
       # -- FTP service port.
       port: 21
 
@@ -214,6 +218,8 @@ service:
         end: 50020
 
     webdav:
+      # -- Enable WebDAV service port.
+      enabled: true
       # -- WebDAV service port.
       port: 81
 
@@ -221,6 +227,8 @@ service:
       nodePort:
 
     http:
+      # -- Enable HTTP service port.
+      enabled: true
       # -- REST API service port.
       port: 80
 
@@ -254,6 +262,7 @@ additionalPorts: {}
   # custom-sftp:
   #   port: 2222           # Service port
   #   containerPort: 22    # Pod port
+  #   exposeOnContainer: true # Whether to expose this port on the container (i.e., add it to the container ports list in the deployment). Defaults to true if not set.
 
 ui:
   ingress:
