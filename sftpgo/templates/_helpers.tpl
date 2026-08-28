@@ -75,3 +75,29 @@ Usage: {{ include "sftpgo.componentname" (list . "component") }}
 {{- $component := index . 1 | trimPrefix "-" -}}
 {{- printf "%s-%s" (include "sftpgo.fullname" $global | trunc (sub 62 (len $component) | int) | trimSuffix "-" ) $component | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Render additional service ports.
+
+Each entry is keyed by the port name. `port` defaults to `containerPort` and
+`targetPort` defaults to the port name, which must match a container port
+declared under the top-level `additionalPorts` key (or by an extra container).
+
+Usage: {{ include "sftpgo.additionalServicePorts" (list "ClusterIP" .Values.additionalPorts) | trim | nindent 4 }}
+*/}}
+{{- define "sftpgo.additionalServicePorts" -}}
+{{- $serviceType := index . 0 -}}
+{{- $ports := index . 1 -}}
+{{- range $name, $port := $ports }}
+- name: {{ $name }}
+  port: {{ required (printf "port or containerPort is required for additional port %q" $name) ($port.port | default $port.containerPort) }}
+  {{- if and (or (eq $serviceType "NodePort") (eq $serviceType "LoadBalancer")) $port.nodePort }}
+  nodePort: {{ $port.nodePort }}
+  {{- end }}
+  targetPort: {{ $port.targetPort | default $name }}
+  protocol: {{ $port.protocol | default "TCP" }}
+  {{- with $port.appProtocol }}
+  appProtocol: {{ . }}
+  {{- end }}
+{{- end }}
+{{- end }}

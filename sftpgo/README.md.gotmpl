@@ -72,6 +72,24 @@ volumeMounts:
 
 Alternatively, you can mount the config file to any arbitrary location (except `/etc/sftpgo`) and set the `SFTPGO_CONFIG_FILE` environment variable (using `env` or `envFrom`, see [Values](#values)).
 
+### Command line arguments
+
+The chart passes `sftpgo serve` to the container by default.
+
+The log level can be set with the `logLevel` key (`info` by default):
+
+```yaml
+logLevel: debug
+```
+
+Any other flag supported by [`sftpgo serve`](https://docs.sftpgo.com/latest/commands/sftpgo_serve/)
+can be appended with the `extraArgs` key:
+
+```yaml
+extraArgs:
+  - --log-utc-time
+```
+
 ### Custom services
 
 The primary service created by the chart includes every enabled server (including HTTP and telemetry).
@@ -93,6 +111,41 @@ services:
 
 Additional services accept the same options as the `service` option in the values file and
 require at least one port.
+
+### Custom ports
+
+Ports that are not managed by the chart (for example ports exposed by a sidecar, or an extra
+port mapping for one of the built-in servers) can be declared with the `additionalPorts` key.
+Entries are keyed by port name; `port` defaults to `containerPort` and `targetPort` defaults to
+the port name:
+
+```yaml
+additionalPorts:
+  custom-sftp:
+    port: 2222         # service port
+    containerPort: 22  # pod port
+    appProtocol: sftp-ssh
+  metrics-alt:
+    containerPort: 9090
+```
+
+The top-level key adds the ports to the deployment **and** to the main service.
+Custom services accept the same schema under their own `additionalPorts` key, allowing you to
+expose a subset of them (or a different port mapping) through a dedicated service:
+
+```yaml
+services:
+  sftp-public:
+    type: LoadBalancer
+    additionalPorts:
+      custom-sftp:
+        port: 2222
+        appProtocol: sftp-ssh
+```
+
+Ports of a custom service are matched to the pod by name, so unless `targetPort` is set
+explicitly, the name must match a container port (one declared under the top-level
+`additionalPorts` key, one of the built-in ports, or a port of an extra container).
 
 ### Gateway API
 

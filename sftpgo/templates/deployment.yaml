@@ -68,6 +68,12 @@ spec:
           args:
             - sftpgo
             - serve
+            {{- with .Values.logLevel }}
+            - --log-level={{ . }}
+            {{- end }}
+            {{- with .Values.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           env:
             {{- if .Values.sftpd.enabled }}
             - name: SFTPGO_SFTPD__BINDINGS__0__PORT
@@ -136,8 +142,8 @@ spec:
               protocol: TCP
             {{- range $name, $port := .Values.additionalPorts }}
             - name: {{ $name }}
-              containerPort: {{ $port.containerPort }}
-              protocol: TCP
+              containerPort: {{ required (printf "containerPort is required for additional port %q" $name) $port.containerPort }}
+              protocol: {{ $port.protocol | default "TCP" }}
             {{- end }}
           livenessProbe:
             httpGet:

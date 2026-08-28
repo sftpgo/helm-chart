@@ -65,6 +65,16 @@ httpd:
   # -- Container HTTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting.
   port: 8080
 
+# -- (string) Log level of the SFTPGo server. Supported values: `debug`, `info`, `warn`, `error`.
+# Set to an empty value to fall back to the default of the image.
+logLevel: info
+
+# -- Additional command line arguments passed to the `sftpgo serve` command.
+# See the [official documentation](https://docs.sftpgo.com/latest/commands/sftpgo_serve/) for the available flags.
+extraArgs: []
+  # - --log-utc-time
+  # - --loaddata-from=/etc/sftpgo/initial-data.json
+
 # -- Application configuration.
 # See the [official documentation](https://docs.sftpgo.com/latest/config-file/).
 config: {}
@@ -236,6 +246,7 @@ service:
 
 # -- Additional services exposing servers (SFTP, FTP, WebDAV, HTTP) individually.
 # The schema matches the one under the `service` key. Additional services need at least one port.
+# Custom ports can be exposed with the `additionalPorts` key (same schema as the top-level one).
 services: {}
   # public:
   #   annotations: {}
@@ -246,14 +257,22 @@ services: {}
   #     sftp: # Only SFTP will be exposed
   #       port: 22
   #       nodePort:
+  #   additionalPorts:
+  #     custom-sftp:
+  #       port: 2222
   #   externalTrafficPolicy:
   #   sessionAffinity:
 
-# -- Additional ports to expose in the deployment and service.
+# -- Additional ports to expose in the deployment and the main service.
+# Ports are keyed by name. `port` defaults to `containerPort` and `targetPort` defaults to the port name.
 additionalPorts: {}
   # custom-sftp:
-  #   port: 2222           # Service port
+  #   port: 2222           # Service port (defaults to containerPort)
   #   containerPort: 22    # Pod port
+  #   nodePort:            # Node port (when applicable)
+  #   targetPort:          # Service target port (defaults to the port name)
+  #   protocol: TCP        # Defaults to TCP
+  #   appProtocol:         # Application protocol hint (optional)
 
 ui:
   ingress:

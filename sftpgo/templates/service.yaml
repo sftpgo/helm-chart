@@ -83,16 +83,17 @@ spec:
       targetPort: telemetry
       protocol: TCP
       appProtocol: http
-    {{- range $name, $port := .Values.additionalPorts }}
-    - name: {{ $name }}
-      port: {{ $port.port | default $port.containerPort }}
-      targetPort: {{ $name }}
-      protocol: TCP
+    {{- with .Values.additionalPorts }}
+    {{- include "sftpgo.additionalServicePorts" (list $.Values.service.type .) | trim | nindent 4 }}
     {{- end }}
   selector:
     {{- include "sftpgo.selectorLabels" . | nindent 4 }}
 
 {{- range $name, $service := .Values.services }}
+{{- $ports := $service.ports | default dict }}
+{{- if and (empty $ports) (empty $service.additionalPorts) }}
+{{- fail (printf "At least one port is required for service %q" $name) }}
+{{- end }}
 ---
 apiVersion: v1
 kind: Service
@@ -122,28 +123,28 @@ spec:
   sessionAffinity: {{ . }}
   {{- end }}
   ports:
-    {{- if and $.Values.sftpd.enabled $service.ports.sftp }}
+    {{- if and $.Values.sftpd.enabled $ports.sftp }}
     - name: sftp
-      port: {{ required (printf "SFTP service port is required for service %q" $name) $service.ports.sftp.port }}
-      {{- if and (or (eq $service.type "NodePort") (eq $service.type "LoadBalancer")) $service.ports.sftp.nodePort }}
-      nodePort: {{ $service.ports.sftp.nodePort }}
+      port: {{ required (printf "SFTP service port is required for service %q" $name) $ports.sftp.port }}
+      {{- if and (or (eq $service.type "NodePort") (eq $service.type "LoadBalancer")) $ports.sftp.nodePort }}
+      nodePort: {{ $ports.sftp.nodePort }}
       {{- end }}
       targetPort: sftp
       protocol: TCP
       appProtocol: sftp-ssh
     {{- end }}
-    {{- if and $.Values.ftpd.enabled $service.ports.ftp }}
+    {{- if and $.Values.ftpd.enabled $ports.ftp }}
     - name: ftp
-      port: {{ required (printf "SFP service port is required for service %q" $name) $service.ports.ftp.port }}
-      {{- if and (or (eq $service.type "NodePort") (eq $service.type "LoadBalancer")) $service.ports.ftp.nodePort }}
-      nodePort: {{ $service.ports.ftp.nodePort }}
+      port: {{ required (printf "SFP service port is required for service %q" $name) $ports.ftp.port }}
+      {{- if and (or (eq $service.type "NodePort") (eq $service.type "LoadBalancer")) $ports.ftp.nodePort }}
+      nodePort: {{ $ports.ftp.nodePort }}
       {{- end }}
       targetPort: ftp
       protocol: TCP
       appProtocol: ftp
-    {{- if $service.ports.ftp.passiveRange }}
-    {{- $start := int $service.ports.ftp.passiveRange.start }}
-    {{- $end := int (add $service.ports.ftp.passiveRange.end 1) }}
+    {{- if $ports.ftp.passiveRange }}
+    {{- $start := int $ports.ftp.passiveRange.start }}
+    {{- $end := int (add $ports.ftp.passiveRange.end 1) }}
     {{- range $port := untilStep $start $end 1 }}
     - name: ftp-passive-{{ $port }}
       port: {{ $port }}
@@ -153,25 +154,28 @@ spec:
     {{- end }}
     {{- end }}
     {{- end }}
-    {{- if and $.Values.webdavd.enabled $service.ports.webdav }}
+    {{- if and $.Values.webdavd.enabled $ports.webdav }}
     - name: webdav
-      port: {{ required (printf "WebDAV service port is required for service %q" $name) $service.ports.webdav.port }}
-      {{- if and (or (eq $service.type "NodePort") (eq $service.type "LoadBalancer")) $service.ports.webdav.nodePort }}
-      nodePort: {{ $service.ports.webdav.nodePort }}
+      port: {{ required (printf "WebDAV service port is required for service %q" $name) $ports.webdav.port }}
+      {{- if and (or (eq $service.type "NodePort") (eq $service.type "LoadBalancer")) $ports.webdav.nodePort }}
+      nodePort: {{ $ports.webdav.nodePort }}
       {{- end }}
       targetPort: webdav
       protocol: TCP
       appProtocol: webdav
     {{- end }}
-    {{- if and $.Values.httpd.enabled $service.ports.http }}
+    {{- if and $.Values.httpd.enabled $ports.http }}
     - name: http
-      port: {{ required (printf "HTTP service port is required for service %q" $name) $service.ports.http.port }}
-      {{- if and (or (eq $service.type "NodePort") (eq $service.type "LoadBalancer")) $service.ports.http.nodePort }}
-      nodePort: {{ $service.ports.http.nodePort }}
+      port: {{ required (printf "HTTP service port is required for service %q" $name) $ports.http.port }}
+      {{- if and (or (eq $service.type "NodePort") (eq $service.type "LoadBalancer")) $ports.http.nodePort }}
+      nodePort: {{ $ports.http.nodePort }}
       {{- end }}
       targetPort: http
       protocol: TCP
       appProtocol: http
+    {{- end }}
+    {{- with $service.additionalPorts }}
+    {{- include "sftpgo.additionalServicePorts" (list $service.type .) | trim | nindent 4 }}
     {{- end }}
   selector:
     {{- include "sftpgo.selectorLabels" $ | nindent 4 }}
