@@ -1,0 +1,12 @@
+podMonitor:
+  enabled: true
+  relabelings:
+    - sourceLabels:
+        - __meta_kubernetes_pod_node_name
+      targetLabel: node
+      action: replace
+  metricRelabelings:
+    - sourceLabels:
+        - __name__
+      regex: "go_gc_duration_seconds.*"
+      action: drop
