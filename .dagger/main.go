@@ -17,6 +17,12 @@ const (
 	// upstream project releases new versions; see
 	// https://github.com/kubernetes-sigs/gateway-api/releases.
 	gatewayAPIVersion = "v1.5.1"
+
+	// Prometheus Operator version supplying the PodMonitor CRD. Installed into
+	// the test cluster so that podMonitor scenarios can be rendered and applied.
+	// Bump as the upstream project releases new versions; see
+	// https://github.com/prometheus-operator/prometheus-operator/releases.
+	prometheusOperatorVersion = "v0.94.0"
 )
 
 type Sftpgo struct {
@@ -123,6 +129,11 @@ func (m *Sftpgo) Test(
 	// required.
 	if err := installGatewayAPICRDs(ctx, k8s); err != nil {
 		return fmt.Errorf("install Gateway API CRDs: %w", err)
+	}
+
+	// Install the PodMonitor CRD so podMonitor scenarios can be applied by helm.
+	if err := installPodMonitorCRD(ctx, k8s); err != nil {
+		return fmt.Errorf("install PodMonitor CRD: %w", err)
 	}
 
 	pkg := m.chart().Package().WithKubeconfigFile(k8s.Config())
@@ -251,6 +262,42 @@ func installGatewayAPICRDs(ctx context.Context, k8s *dagger.K3S) error {
 			"kubectl", "wait", "--for=condition=established", "--timeout=60s", "crd/" + crd,
 		})
 	}
+
+	_, err := ctr.Sync(ctx)
+	return err
+}
+
+// installPodMonitorCRD installs the Prometheus Operator PodMonitor CRD into the
+// given k3s cluster.
+//
+// Only the PodMonitor CRD is installed, not the full operator bundle: the tests
+// need the API server to accept and validate PodMonitor objects, not to
+// reconcile them into actual scrape targets.
+func installPodMonitorCRD(ctx context.Context, k8s *dagger.K3S) error {
+	manifestURL := fmt.Sprintf(
+		"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/%s/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml",
+		prometheusOperatorVersion,
+	)
+
+	// Retry for the same reason as the Gateway API CRDs: on a freshly started
+	// cluster the apply can fail while the API server is still coming up.
+	applyScript := `for i in $(seq 1 5); do ` +
+		`kubectl apply --server-side=true -f "$0" && exit 0; ` +
+		`echo "PodMonitor CRD apply attempt $i failed, retrying..."; sleep 5; ` +
+		`done; exit 1`
+
+	ctr := dag.Container().
+		From("bitnami/kubectl").
+		WithoutEntrypoint().
+		WithServiceBinding("k3s", k8s.Server()).
+		WithFile("/.kube/config", k8s.Config(), dagger.ContainerWithFileOpts{Permissions: 1001}).
+		WithEnvVariable("KUBECONFIG", "/.kube/config").
+		WithUser("1001").
+		WithExec([]string{"sh", "-c", applyScript, manifestURL}).
+		WithExec([]string{
+			"kubectl", "wait", "--for=condition=established", "--timeout=60s",
+			"crd/podmonitors.monitoring.coreos.com",
+		})
 
 	_, err := ctr.Sync(ctx)
 	return err

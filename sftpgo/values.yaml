@@ -428,7 +428,7 @@ persistence:
     storageClassName: ""
 
 # -- Prometheus PodMonitor configuration.
-# See the [Prometheus Operator documentation](https://prometheus-operator.dev/docs/operator/api/#monitoring.coreos.com/v1.PodMonitor) for details.
+# See the [Prometheus Operator documentation](https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.PodMonitor) for details.
 podMonitor:
   # -- Enable PodMonitor resource for Prometheus Operator to scrape pod metrics.
   enabled: false
@@ -446,6 +446,12 @@ podMonitor:
 
   # -- Scrape timeout (e.g., 10s).
   scrapeTimeout: 10s
+
+  # -- [Relabeling rules](https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.RelabelConfig) applied to scrape targets before scraping.
+  relabelings: []
+
+  # -- [Relabeling rules](https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.RelabelConfig) applied to samples before ingestion.
+  metricRelabelings: []
 
 # -- [Gateway API](https://gateway-api.sigs.k8s.io/) routes configuration.
 # HTTPRoute is part of the Gateway API standard channel (GA in v1).
