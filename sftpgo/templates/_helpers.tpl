@@ -75,3 +75,16 @@ Usage: {{ include "sftpgo.componentname" (list . "component") }}
 {{- $component := index . 1 | trimPrefix "-" -}}
 {{- printf "%s-%s" (include "sftpgo.fullname" $global | trunc (sub 62 (len $component) | int) | trimSuffix "-" ) $component | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Compute a ConfigMap or Secret checksum from its data only, for the checksum/* pod annotations.
+The full manifest carries the helm.sh/chart label, which changes on every chart version bump.
+The template may render several documents, so hash the data of each one.
+*/}}
+{{- define "sftpgo.configMapOrSecretContentHash" -}}
+{{- $data := list -}}
+{{- range regexSplit "(?m)^---$" (include (print .ctx.Template.BasePath .name) .ctx) -1 -}}
+{{- $data = append $data (pick (fromYaml .) "data" "stringData") -}}
+{{- end -}}
+{{ $data | toYaml | sha256sum }}
+{{- end -}}
