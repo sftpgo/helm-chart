@@ -71,6 +71,24 @@ volumeMounts:
 
 Alternatively, you can mount the config file to any arbitrary location (except `/etc/sftpgo`) and set the `SFTPGO_CONFIG_FILE` environment variable (using `env` or `envFrom`, see [Values](#values)).
 
+### Command line arguments
+
+The chart passes `sftpgo serve` to the container by default.
+
+The log level can be set with the `logLevel` key (`info` by default):
+
+```yaml
+logLevel: debug
+```
+
+Any other flag supported by [`sftpgo serve`](https://docs.sftpgo.com/latest/commands/sftpgo_serve/)
+can be appended with the `extraArgs` key:
+
+```yaml
+extraArgs:
+  - --log-utc-time
+```
+
 ### Custom services
 
 The primary service created by the chart includes every enabled server (including HTTP and telemetry).
@@ -92,6 +110,41 @@ services:
 
 Additional services accept the same options as the `service` option in the values file and
 require at least one port.
+
+### Custom ports
+
+Ports that are not managed by the chart (for example ports exposed by a sidecar, or an extra
+port mapping for one of the built-in servers) can be declared with the `additionalPorts` key.
+Entries are keyed by port name; `port` defaults to `containerPort` and `targetPort` defaults to
+the port name:
+
+```yaml
+additionalPorts:
+  custom-sftp:
+    port: 2222         # service port
+    containerPort: 22  # pod port
+    appProtocol: sftp-ssh
+  metrics-alt:
+    containerPort: 9090
+```
+
+The top-level key adds the ports to the deployment **and** to the main service.
+Custom services accept the same schema under their own `additionalPorts` key, allowing you to
+expose a subset of them (or a different port mapping) through a dedicated service:
+
+```yaml
+services:
+  sftp-public:
+    type: LoadBalancer
+    additionalPorts:
+      custom-sftp:
+        port: 2222
+        appProtocol: sftp-ssh
+```
+
+Ports of a custom service are matched to the pod by name, so unless `targetPort` is set
+explicitly, the name must match a container port (one declared under the top-level
+`additionalPorts` key, one of the built-in ports, or a port of an extra container).
 
 ### Gateway API
 
@@ -197,7 +250,7 @@ not model port ranges.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| additionalPorts | object | `{}` | Additional ports to expose in the deployment and service. |
+| additionalPorts | object | `{}` | Additional ports to expose in the deployment and the main service. Ports are keyed by name. `port` defaults to `containerPort` and `targetPort` defaults to the port name. |
 | affinity | object | `{}` | [Affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity) configuration. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#scheduling) for details. |
 | api.ingress.annotations | object | `{}` | Annotations to be added to the ingress. |
 | api.ingress.className | string | `""` | Ingress [class name](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class). |
@@ -212,6 +265,7 @@ not model port ranges.
 | env | object | `{}` | Additional environment variables passed directly to containers using a simplified key-value syntax. |
 | envFrom | list | `[]` | Additional environment variables mounted from [secrets](https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables) or [config maps](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables) for details. |
 | envVars | list | `[]` | Additional environment variables passed directly to containers. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables) for details. |
+| extraArgs | list | `[]` | Additional command line arguments passed to the `sftpgo serve` command. See the [official documentation](https://docs.sftpgo.com/latest/commands/sftpgo_serve/) for the available flags. |
 | extraContainers | list | `[]` | Additional [containers](https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers) to run in the same pod (e.g., sidecars). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#containers) for details. |
 | ftpd.enabled | bool | `false` | Enable FTP service. |
 | ftpd.port | int | `2021` | Container FTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting. |
@@ -261,6 +315,7 @@ not model port ranges.
 | imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when [pulling images](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret) (from private registries). |
 | initContainers | list | `[]` | Add [init containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) to the pod. |
 | lifecycle | object | `{}` | Container [lifecycle hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/). |
+| logLevel | string | `"info"` | Log level of the SFTPGo server. Supported values: `debug`, `info`, `warn`, `error`. Set to an empty value to fall back to the default of the image. |
 | nameOverride | string | `""` | A name in place of the chart name for `app:` labels. |
 | networkPolicy | object | `{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]}` | [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) configuration. |
 | networkPolicy.egress | list | `[]` | Egress rules. |
@@ -309,7 +364,7 @@ not model port ranges.
 | serviceAccount.automountServiceAccountToken | bool | `true` | Automount API credentials for the Service Account. |
 | serviceAccount.create | bool | `true` | Enable service account creation. |
 | serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template. |
-| services | object | `{}` | Additional services exposing servers (SFTP, FTP, WebDAV, HTTP) individually. The schema matches the one under the `service` key. Additional services need at least one port. |
+| services | object | `{}` | Additional services exposing servers (SFTP, FTP, WebDAV, HTTP) individually. The schema matches the one under the `service` key. Additional services need at least one port. Custom ports can be exposed with the `additionalPorts` key (same schema as the top-level one). |
 | sftpd.enabled | bool | `true` | Enable SFTP service. |
 | sftpd.port | int | `2022` | Container SFTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting. |
 | tolerations | list | `[]` | [Tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) for node taints. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#scheduling) for details. |
