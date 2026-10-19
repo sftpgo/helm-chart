@@ -104,6 +104,9 @@ metadata:
   namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "sftpgo.labels" $ | nindent 4 }}
+    {{- with $service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   {{- with $service.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
