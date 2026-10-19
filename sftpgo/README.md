@@ -85,6 +85,8 @@ services:
   sftp-public:
     annotations:
       external-dns.alpha.kubernetes.io/hostname: sftp.mydomain.com.
+    labels:
+      environment: production
     type: LoadBalancer
     ports:
       sftp: 22

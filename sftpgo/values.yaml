@@ -239,6 +239,7 @@ service:
 services: {}
   # public:
   #   annotations: {}
+  #   labels: {}  # e.g. { environment: production }
   #   type: LoadBalancer
   #   loadBalancerIP:
   #   loadBalancerSourceRanges: []
