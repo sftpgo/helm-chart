@@ -5,8 +5,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "sftpgo.labels" . | nindent 4 }}
-    {{- if .Values.service.labels }}
-    {{ toYaml .Values.service.labels | nindent 4 }}
+    {{- with .Values.service.labels }}
+    {{- toYaml . | nindent 4 }}
     {{- end }}
   {{- with .Values.service.annotations }}
   annotations:
