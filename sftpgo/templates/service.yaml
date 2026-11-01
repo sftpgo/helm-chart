@@ -18,6 +18,9 @@ spec:
   externalTrafficPolicy: {{ . }}
   {{- end }}
   {{- if eq .Values.service.type "LoadBalancer" }}
+  {{- with .Values.service.loadBalancerClass }}
+  loadBalancerClass: {{ . }}
+  {{- end }}
   {{- with .Values.service.loadBalancerIP }}
   loadBalancerIP: {{ . }}
   {{- end }}
@@ -111,6 +114,9 @@ spec:
   externalTrafficPolicy: {{ . }}
   {{- end }}
   {{- if eq $service.type "LoadBalancer" }}
+  {{- with $service.loadBalancerClass }}
+  loadBalancerClass: {{ . }}
+  {{- end }}
   {{- with $service.loadBalancerIP }}
   loadBalancerIP: {{ . }}
   {{- end }}

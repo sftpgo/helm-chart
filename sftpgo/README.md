@@ -87,11 +87,26 @@ services:
       external-dns.alpha.kubernetes.io/hostname: sftp.mydomain.com.
     type: LoadBalancer
     ports:
-      sftp: 22
+      sftp:
+        port: 22
 ```
 
 Additional services accept the same options as the `service` option in the values file and
 require at least one port.
+
+If your cluster runs more than one load balancer implementation, set `loadBalancerClass`
+(on `service` or on any entry under `services`) to choose which one handles the service.
+The field only applies to `LoadBalancer` services and is immutable: changing it requires recreating the service.
+
+```yaml
+services:
+  sftp-public:
+    type: LoadBalancer
+    loadBalancerClass: metallb.io/metallb
+    ports:
+      sftp:
+        port: 22
+```
 
 ### Gateway API
 
@@ -291,6 +306,7 @@ not model port ranges.
 | service.annotations | object | `{}` | Annotations to be added to the service. |
 | service.externalTrafficPolicy | string | `nil` | Route external traffic to node-local or cluster-wide endoints. Useful for [preserving the client source IP](https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip). |
 | service.labels | object | `{}` | labels to be added to the service. |
+| service.loadBalancerClass | string | `nil` | Only applies when the service type is LoadBalancer. The [class](https://kubernetes.io/docs/concepts/services-networking/service/#load-balancer-class) of the load balancer implementation this service belongs to. Useful when multiple load balancer providers are available in the cluster. This field is immutable: changing it requires recreating the service. |
 | service.loadBalancerIP | string | `nil` | Only applies when the service type is LoadBalancer. Load balancer will get created with the IP specified in this field. |
 | service.loadBalancerSourceRanges | list | `[]` | If specified (and supported by the cloud provider), traffic through the load balancer will be restricted to the specified client IPs. Valid values are IP CIDR blocks. |
 | service.ports.ftp.nodePort | int | `nil` | FTP node port (when applicable). |

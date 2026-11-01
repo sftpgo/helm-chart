@@ -88,11 +88,26 @@ services:
       external-dns.alpha.kubernetes.io/hostname: sftp.mydomain.com.
     type: LoadBalancer
     ports:
-      sftp: 22
+      sftp:
+        port: 22
 ```
 
 Additional services accept the same options as the `service` option in the values file and
 require at least one port.
+
+If your cluster runs more than one load balancer implementation, set `loadBalancerClass`
+(on `service` or on any entry under `services`) to choose which one handles the service.
+The field only applies to `LoadBalancer` services and is immutable: changing it requires recreating the service.
+
+```yaml
+services:
+  sftp-public:
+    type: LoadBalancer
+    loadBalancerClass: metallb.io/metallb
+    ports:
+      sftp:
+        port: 22
+```
 
 ### Gateway API
 

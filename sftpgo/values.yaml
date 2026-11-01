@@ -184,6 +184,11 @@ service:
   # -- Kubernetes [service type](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types).
   type: ClusterIP
 
+  # -- (string) Only applies when the service type is LoadBalancer. The [class](https://kubernetes.io/docs/concepts/services-networking/service/#load-balancer-class)
+  # of the load balancer implementation this service belongs to. Useful when multiple load balancer providers are available in the cluster.
+  # This field is immutable: changing it requires recreating the service.
+  loadBalancerClass:
+
   # -- (string) Only applies when the service type is LoadBalancer. Load balancer will get created with the IP specified in this field.
   loadBalancerIP:
 
@@ -240,6 +245,7 @@ services: {}
   # public:
   #   annotations: {}
   #   type: LoadBalancer
+  #   loadBalancerClass:
   #   loadBalancerIP:
   #   loadBalancerSourceRanges: []
   #   ports:
