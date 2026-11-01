@@ -33,12 +33,14 @@ config:
 
 A custom configuration file can be mounted using the `volumes` and `volumeMounts` keys (see [Values](#values)).
 
-By default, SFTPGo looks at the following locations for configuration (in the order of precedence):
+By default, SFTPGo looks for a configuration file named `sftpgo` (with any supported extension, e.g. `sftpgo.json`, `sftpgo.yaml`) in the following locations, in order of precedence (the first file found wins):
 
-- `/var/lib/.config/sftpgo`
-- `/etc/sftpgo` (already mounted by this chart)
+- the configuration directory, which defaults to the current working directory, `/var/lib/sftpgo` (it can be changed using the `SFTPGO_CONFIG_DIR` environment variable)
+- `$HOME/.config/sftpgo`, that is `/var/lib/sftpgo/.config/sftpgo` since `/var/lib/sftpgo` is the home directory of the `sftpgo` user
+- `/etc/sftpgo` (the chart mounts the configuration generated from `values.yaml` to `/etc/sftpgo/sftpgo.json`)
+- `/usr/local/etc/sftpgo`
 
-You can mount a config map or a secret to `/var/lib/.config/sftpgo`.
+You can mount a config map or a secret to `/var/lib/sftpgo/.config/sftpgo`.
 
 **Note:** this method will override all configuration set in `values.yaml`.
 
@@ -54,7 +56,7 @@ metadata:
 data:
   sftpgo.yaml: |-
     sftpd:
-        max_auth_retries: 10
+        max_auth_tries: 10
 ```
 
 ```yaml
