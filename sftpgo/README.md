@@ -120,8 +120,11 @@ is used for SFTP and FTP.
   resources and attaches them to an existing Gateway via `parentRefs`.
 - `HTTPRoute` is part of the Gateway API **standard** channel (GA in `gateway.networking.k8s.io/v1`,
   Gateway API v1.0, October 2023). Any conformant controller supports it.
-- `TCPRoute` is only available in the Gateway API **experimental** channel (`v1alpha2`). The
-  experimental CRDs must be installed in the cluster, and the controller must support TCPRoute.
+- `TCPRoute` is part of the **standard** channel since Gateway API v1.6 (`gateway.networking.k8s.io/v1`);
+  older releases only provide it in the **experimental** channel (`v1alpha2`). The chart uses `v1`
+  when the cluster serves it and falls back to `v1alpha2` otherwise. With `helm template`, which
+  does not query the cluster, pass `--api-versions gateway.networking.k8s.io/v1/TCPRoute` to render
+  `v1`. The controller must support TCPRoute.
   Controller support varies: for example Istio and Envoy Gateway support it; some controllers
   (e.g. upstream Nginx Gateway Fabric) do not.
 
@@ -231,7 +234,7 @@ not model port ranges.
 | ftpd.enabled | bool | `false` | Enable FTP service. |
 | ftpd.port | int | `2021` | Container FTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting. |
 | fullnameOverride | string | `""` | A name to substitute for the full names of resources. |
-| gatewayApi | object | `{"httpRoutes":{"api":{"annotations":{},"backend":{},"enabled":false,"filters":[],"hostnames":[],"labels":{},"parentRefs":[],"pathPrefix":"/api"},"ui":{"annotations":{},"backend":{},"enabled":false,"filters":[],"hostnames":[],"labels":{},"parentRefs":[],"pathPrefix":"/"},"webdav":{"annotations":{},"backend":{},"enabled":false,"filters":[],"hostnames":[],"labels":{},"parentRefs":[],"pathPrefix":"/"}},"tcpRoutes":{"ftp":{"annotations":{},"backend":{},"enabled":false,"labels":{},"parentRefs":[]},"sftp":{"annotations":{},"backend":{},"enabled":false,"labels":{},"parentRefs":[]}}}` | [Gateway API](https://gateway-api.sigs.k8s.io/) routes configuration. HTTPRoute is part of the Gateway API standard channel (GA in v1). TCPRoute requires the experimental channel CRDs to be installed in the cluster. See the README for compatibility details and path-prefix semantics. |
+| gatewayApi | object | `{"httpRoutes":{"api":{"annotations":{},"backend":{},"enabled":false,"filters":[],"hostnames":[],"labels":{},"parentRefs":[],"pathPrefix":"/api"},"ui":{"annotations":{},"backend":{},"enabled":false,"filters":[],"hostnames":[],"labels":{},"parentRefs":[],"pathPrefix":"/"},"webdav":{"annotations":{},"backend":{},"enabled":false,"filters":[],"hostnames":[],"labels":{},"parentRefs":[],"pathPrefix":"/"}},"tcpRoutes":{"ftp":{"annotations":{},"backend":{},"enabled":false,"labels":{},"parentRefs":[]},"sftp":{"annotations":{},"backend":{},"enabled":false,"labels":{},"parentRefs":[]}}}` | [Gateway API](https://gateway-api.sigs.k8s.io/) routes configuration. HTTPRoute is part of the Gateway API standard channel (GA in v1). TCPRoute requires the standard channel CRDs v1.6 or later, or the experimental channel CRDs. See the README for compatibility details and path-prefix semantics. |
 | gatewayApi.httpRoutes.api.annotations | object | `{}` | Annotations to be added to the API HTTPRoute. |
 | gatewayApi.httpRoutes.api.backend | object | `{}` | Backend override. Defaults to the main chart Service on the HTTP port. Accepted keys: `kind`, `name`, `port`, `weight`. |
 | gatewayApi.httpRoutes.api.enabled | bool | `false` | Enable [HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/) for the REST API. |
@@ -258,12 +261,12 @@ not model port ranges.
 | gatewayApi.httpRoutes.webdav.pathPrefix | string | `"/"` | Path prefix for the WebDAV route. Should match the WebDAV binding prefix configured in SFTPGo (default `/`). |
 | gatewayApi.tcpRoutes.ftp.annotations | object | `{}` | Annotations to be added to the FTP TCPRoute. |
 | gatewayApi.tcpRoutes.ftp.backend | object | `{}` | Backend override. Defaults to the main chart Service on the FTP control port. Accepted keys: `kind`, `name`, `port`, `weight`. |
-| gatewayApi.tcpRoutes.ftp.enabled | bool | `false` | Enable [TCPRoute](https://gateway-api.sigs.k8s.io/api-types/tcproute/) for FTP. Requires the Gateway API experimental channel CRDs. Only routes the FTP control port; passive data ports are not handled. |
+| gatewayApi.tcpRoutes.ftp.enabled | bool | `false` | Enable [TCPRoute](https://gateway-api.sigs.k8s.io/api-types/tcproute/) for FTP. Requires the Gateway API standard channel CRDs v1.6 or later, or the experimental channel CRDs. Only routes the FTP control port; passive data ports are not handled. |
 | gatewayApi.tcpRoutes.ftp.labels | object | `{}` | Labels to be added to the FTP TCPRoute. |
 | gatewayApi.tcpRoutes.ftp.parentRefs | list | `[]` | ParentRefs for the FTP TCPRoute. At least one entry is required for the route to be attached to a Gateway. |
 | gatewayApi.tcpRoutes.sftp.annotations | object | `{}` | Annotations to be added to the SFTP TCPRoute. |
 | gatewayApi.tcpRoutes.sftp.backend | object | `{}` | Backend override. Defaults to the main chart Service on the SFTP port. Accepted keys: `kind`, `name`, `port`, `weight`. |
-| gatewayApi.tcpRoutes.sftp.enabled | bool | `false` | Enable [TCPRoute](https://gateway-api.sigs.k8s.io/api-types/tcproute/) for SFTP. Requires the Gateway API experimental channel CRDs. |
+| gatewayApi.tcpRoutes.sftp.enabled | bool | `false` | Enable [TCPRoute](https://gateway-api.sigs.k8s.io/api-types/tcproute/) for SFTP. Requires the Gateway API standard channel CRDs v1.6 or later, or the experimental channel CRDs. |
 | gatewayApi.tcpRoutes.sftp.labels | object | `{}` | Labels to be added to the SFTP TCPRoute. |
 | gatewayApi.tcpRoutes.sftp.parentRefs | list | `[]` | ParentRefs for the SFTP TCPRoute. At least one entry is required for the route to be attached to a Gateway. |
 | hostNetwork | bool | `false` | Run pods in the host network of nodes. Warning: The use of host network is [discouraged](https://kubernetes.io/docs/concepts/configuration/overview/#services). Make sure to use it only when absolutely necessary. |

@@ -16,7 +16,7 @@ const (
 	// HTTPRoute/TCPRoute scenarios can be rendered and applied. Bump as the
 	// upstream project releases new versions; see
 	// https://github.com/kubernetes-sigs/gateway-api/releases.
-	gatewayAPIVersion = "v1.5.1"
+	gatewayAPIVersion = "v1.7.0"
 
 	// Prometheus Operator version supplying the PodMonitor CRD. Installed into
 	// the test cluster so that podMonitor scenarios can be rendered and applied.
@@ -223,10 +223,17 @@ func (m *Sftpgo) chart() *dagger.HelmChart {
 // into the given k3s cluster.
 //
 // Only the experimental channel is installed: it is a superset of standard
-// (HTTPRoute as v1 stable, TCPRoute/UDPRoute as v1alpha2). Since v1.5 the
+// (HTTPRoute and, since v1.6, TCPRoute as v1; TCPRoute is also served as
+// v1alpha2, so both API versions selected by the chart work). Since v1.5 the
 // standard channel ships a ValidatingAdmissionPolicy (safe-upgrades) that
 // blocks installing experimental CRDs on top of standard ones, so the two
 // cannot be applied side-by-side.
+//
+// k3s v1.37 and later also install the standard channel CRDs on their own,
+// through a bundled Helm chart that can run after this function and replace
+// these CRDs. The standard channel serves TCPRoute only as v1: the chart
+// selects the TCPRoute API version from the cluster capabilities, so the
+// tests work with either set of CRDs.
 //
 // Server-side apply is required because the experimental manifest exceeds the
 // client-side apply size limit.

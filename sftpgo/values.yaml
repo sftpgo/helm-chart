@@ -461,7 +461,7 @@ podMonitor:
 
 # -- [Gateway API](https://gateway-api.sigs.k8s.io/) routes configuration.
 # HTTPRoute is part of the Gateway API standard channel (GA in v1).
-# TCPRoute requires the experimental channel CRDs to be installed in the cluster.
+# TCPRoute requires the standard channel CRDs v1.6 or later, or the experimental channel CRDs.
 # See the README for compatibility details and path-prefix semantics.
 gatewayApi:
   httpRoutes:
@@ -554,7 +554,7 @@ gatewayApi:
 
   tcpRoutes:
     sftp:
-      # -- Enable [TCPRoute](https://gateway-api.sigs.k8s.io/api-types/tcproute/) for SFTP. Requires the Gateway API experimental channel CRDs.
+      # -- Enable [TCPRoute](https://gateway-api.sigs.k8s.io/api-types/tcproute/) for SFTP. Requires the Gateway API standard channel CRDs v1.6 or later, or the experimental channel CRDs.
       enabled: false
 
       # -- Annotations to be added to the SFTP TCPRoute.
@@ -573,7 +573,7 @@ gatewayApi:
       backend: {}
 
     ftp:
-      # -- Enable [TCPRoute](https://gateway-api.sigs.k8s.io/api-types/tcproute/) for FTP. Requires the Gateway API experimental channel CRDs. Only routes the FTP control port; passive data ports are not handled.
+      # -- Enable [TCPRoute](https://gateway-api.sigs.k8s.io/api-types/tcproute/) for FTP. Requires the Gateway API standard channel CRDs v1.6 or later, or the experimental channel CRDs. Only routes the FTP control port; passive data ports are not handled.
       enabled: false
 
       # -- Annotations to be added to the FTP TCPRoute.

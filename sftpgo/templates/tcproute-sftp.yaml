@@ -1,7 +1,7 @@
 {{- if and .Values.sftpd.enabled .Values.gatewayApi.tcpRoutes.sftp.enabled -}}
 {{- $route := .Values.gatewayApi.tcpRoutes.sftp -}}
 {{- $backend := $route.backend | default dict -}}
-apiVersion: gateway.networking.k8s.io/v1alpha2
+apiVersion: {{ include "sftpgo.tcpRouteApiVersion" . }}
 kind: TCPRoute
 metadata:
   name: {{ include "sftpgo.componentname" (list . "sftp") }}

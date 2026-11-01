@@ -121,8 +121,11 @@ is used for SFTP and FTP.
   resources and attaches them to an existing Gateway via `parentRefs`.
 - `HTTPRoute` is part of the Gateway API **standard** channel (GA in `gateway.networking.k8s.io/v1`,
   Gateway API v1.0, October 2023). Any conformant controller supports it.
-- `TCPRoute` is only available in the Gateway API **experimental** channel (`v1alpha2`). The
-  experimental CRDs must be installed in the cluster, and the controller must support TCPRoute.
+- `TCPRoute` is part of the **standard** channel since Gateway API v1.6 (`gateway.networking.k8s.io/v1`);
+  older releases only provide it in the **experimental** channel (`v1alpha2`). The chart uses `v1`
+  when the cluster serves it and falls back to `v1alpha2` otherwise. With `helm template`, which
+  does not query the cluster, pass `--api-versions gateway.networking.k8s.io/v1/TCPRoute` to render
+  `v1`. The controller must support TCPRoute.
   Controller support varies: for example Istio and Envoy Gateway support it; some controllers
   (e.g. upstream Nginx Gateway Fabric) do not.
 

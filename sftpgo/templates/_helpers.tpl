@@ -88,3 +88,16 @@ The template may render several documents, so hash the data of each one.
 {{- end -}}
 {{ $data | toYaml | sha256sum }}
 {{- end -}}
+
+{{/*
+API version of the TCPRoute resources. Since Gateway API v1.6 TCPRoute is served as v1, in the
+standard and experimental channels, and the standard channel no longer serves v1alpha2. Older
+experimental channel CRDs only serve v1alpha2.
+*/}}
+{{- define "sftpgo.tcpRouteApiVersion" -}}
+{{- if .Capabilities.APIVersions.Has "gateway.networking.k8s.io/v1/TCPRoute" -}}
+gateway.networking.k8s.io/v1
+{{- else -}}
+gateway.networking.k8s.io/v1alpha2
+{{- end -}}
+{{- end -}}
