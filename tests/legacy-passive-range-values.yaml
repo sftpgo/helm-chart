@@ -1,0 +1,21 @@
+# Deprecated passive range keys: the main service one sets the range SFTPGo listens on,
+# the additional service one enables the passive ports and must match it.
+ftpd:
+  enabled: true
+
+service:
+  ports:
+    ftp:
+      passiveRange:
+        start: 30200
+        end: 30202
+
+services:
+  public:
+    type: ClusterIP
+    ports:
+      ftp:
+        port: 21
+        passiveRange:
+          start: 30200
+          end: 30202

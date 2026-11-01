@@ -79,10 +79,11 @@ spec:
             {{- if .Values.ftpd.enabled }}
             - name: SFTPGO_FTPD__BINDINGS__0__PORT
               value: "{{ .Values.ftpd.port}}"
+            {{- $passiveRange := include "sftpgo.ftpPassiveRange" . | fromJson }}
             - name: SFTPGO_FTPD__PASSIVE_PORT_RANGE__START
-              value: "{{ .Values.service.ports.ftp.passiveRange.start }}"
+              value: "{{ int $passiveRange.start }}"
             - name: SFTPGO_FTPD__PASSIVE_PORT_RANGE__END
-              value: "{{ .Values.service.ports.ftp.passiveRange.end }}"
+              value: "{{ int $passiveRange.end }}"
             {{- end }}
             {{- if .Values.webdavd.enabled }}
             - name: SFTPGO_WEBDAVD__BINDINGS__0__PORT
@@ -134,6 +135,7 @@ spec:
             - name: telemetry
               containerPort: 10000
               protocol: TCP
+            {{- include "sftpgo.validateAdditionalPorts" . }}
             {{- range $name, $port := .Values.additionalPorts }}
             - name: {{ $name }}
               containerPort: {{ $port.containerPort }}

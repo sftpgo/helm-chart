@@ -113,6 +113,85 @@ services:
         port: 22
 ```
 
+### Additional ports
+
+Besides the built-in servers (`sftp`, `ftp`, `webdav`, `http`), the `ports` of `service` and of any entry
+under `services` accept other keys. Each key is the name of a service port with these options:
+
+- `port`: service port. Required, unless the key matches an `additionalPorts` entry (see below).
+- `targetPort`: container port, by name or number. Defaults to the key, which must match a named
+  container port: a built-in server, `telemetry`, an `additionalPorts` entry or a port of an extra
+  container (or of a sidecar init container, with `restartPolicy: Always`).
+- `nodePort`: node port, for `NodePort` and `LoadBalancer` services.
+- `appProtocol`: defaults to the `additionalPorts` entry with the same key, if any, or to the
+  application protocol of the targeted SFTPGo port.
+
+All the ports use the TCP protocol. Keys are service port names: lowercase letters, digits and hyphens. A key set to `null` is ignored,
+so a values file can remove a port defined by another one.
+
+The following example exposes SFTP on both port 22 and port 2200:
+
+```yaml
+services:
+  sftp-public:
+    type: LoadBalancer
+    ports:
+      sftp:
+        port: 22
+      sftp-alt:
+        port: 2200
+        targetPort: sftp
+```
+
+When SFTPGo listens on more ports, for example with additional bindings, declare them under
+`additionalPorts`. They are added to the container and to the main service, and additional services
+can expose them by listing their name: `port` defaults to the `additionalPorts` entry, `nodePort` is not
+inherited because node ports are allocated cluster-wide. The following example adds an FTP binding with implicit TLS
+on container port 2990 and exposes it on port 990:
+
+```yaml
+ftpd:
+  enabled: true
+
+env:
+  SFTPGO_FTPD__BINDINGS__1__PORT: "2990"
+  SFTPGO_FTPD__BINDINGS__1__TLS_MODE: "2" # requires a TLS certificate, configured as usual
+
+additionalPorts:
+  ftps:
+    containerPort: 2990
+    port: 990
+
+services:
+  ftps-public:
+    type: LoadBalancer
+    ftpPassive: true
+    ports:
+      ftps: {} # port 990, targetPort ftps
+```
+
+### FTP passive ports
+
+SFTPGo uses a single passive port range, shared by all the FTP bindings, set with `ftpd.passivePortRange`.
+The chart sets it with environment variables, which take precedence over `passive_port_range` in `config`.
+The server announces the port number to clients, so passive ports cannot be remapped: the chart exposes
+each port of the range with the same service and container port, and for `NodePort` services also as
+node port (the range must be within the node port range of the cluster). The default range (30050-30070)
+is within the default node port range. Node ports are allocated cluster-wide: only one `NodePort` service,
+across all the releases in the cluster, can expose the passive ports of a given range.
+
+The main service exposes the passive ports when the FTP server is enabled (set `service.ftpPassive: false`
+to disable this). Additional services expose them only when `ftpPassive: true` is set, even if they do not
+expose the `ftp` port, as in the FTPS example above.
+
+`service.ports.ftp.passiveRange` and `services.<name>.ports.ftp.passiveRange` are deprecated.
+The former is still honored if `ftpd.passivePortRange` has its default value, otherwise the two must match.
+The latter enables the passive ports of the additional service and must match the passive port range.
+See the [changelog](https://github.com/sftpgo/helm-chart/blob/main/CHANGELOG.md) for upgrade notes.
+
+Note that each passive port is a separate service port: some load balancer implementations limit
+the number of ports per service.
+
 ### Gateway API
 
 The chart can expose SFTPGo via [Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/) resources
@@ -212,7 +291,7 @@ gatewayApi:
           sectionName: sftp
 ```
 
-Note: for FTP, only the control port is routed. Passive data ports (`service.ports.ftp.passiveRange`)
+Note: for FTP, only the control port is routed. Passive data ports (`ftpd.passivePortRange`)
 require separate handling (typically a dedicated `LoadBalancer` Service) because Gateway API does
 not model port ranges.
 

@@ -51,6 +51,14 @@ ftpd:
   # -- Container FTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting.
   port: 2021
 
+  # FTP passive port range. The default is within the default NodePort range (30000-32767).
+  passivePortRange:
+    # -- FTP passive range start port.
+    start: 30050
+
+    # -- FTP passive range end port.
+    end: 30070
+
 webdavd:
   # -- Enable WebDAV service.
   enabled: false
@@ -211,12 +219,8 @@ service:
       # -- (int) FTP node port (when applicable).
       nodePort:
 
-      passiveRange:
-        # -- FTP passive range start port.
-        start: 50000
-
-        # -- FTP passive range end port.
-        end: 50020
+      # -- Deprecated: use `ftpd.passivePortRange`.
+      passiveRange: {}
 
     webdav:
       # -- WebDAV service port.
@@ -232,6 +236,16 @@ service:
       # -- (int) REST API node port (when applicable).
       nodePort:
 
+    # Additional ports, keyed by port name. See "Additional ports" in the README.
+    # sftp-alt:
+    #   port: 2200           # Service port (defaults to the additionalPorts entry, if any)
+    #   targetPort: sftp     # Container port name or number (defaults to the port name)
+    #   nodePort:            # Node port (when applicable)
+    #   appProtocol: sftp-ssh
+
+  # -- Expose the FTP passive ports when the FTP server is enabled. NodePort services use them as node ports.
+  ftpPassive: true
+
   # -- Route external traffic to node-local or cluster-wide endoints.
   # Useful for [preserving the client source IP](https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip).
   externalTrafficPolicy:
@@ -240,7 +254,7 @@ service:
   sessionAffinity:
 
 # -- Additional services exposing servers (SFTP, FTP, WebDAV, HTTP) individually.
-# The schema matches the one under the `service` key. Additional services need at least one port.
+# Same schema as `service`, but only the listed ports are exposed and `ftpPassive` defaults to false.
 services: {}
   # public:
   #   annotations: {}
@@ -253,14 +267,21 @@ services: {}
   #     sftp: # Only SFTP will be exposed
   #       port: 22
   #       nodePort:
+  #     sftp-alt: # SFTP also on port 2200
+  #       port: 2200
+  #       targetPort: sftp
+  #   ftpPassive: false
   #   externalTrafficPolicy:
   #   sessionAffinity:
 
-# -- Additional ports to expose in the deployment and service.
+# -- Additional ports of the SFTPGo container (e.g. for additional bindings), keyed by port name (max 15 characters).
+# They are also exposed by the main service. See "Additional ports" in the README.
 additionalPorts: {}
-  # custom-sftp:
-  #   port: 2222           # Service port
-  #   containerPort: 22    # Pod port
+  # ftps:
+  #   containerPort: 2990  # Container port (required)
+  #   port: 990            # Service port (defaults to containerPort)
+  #   nodePort:            # Node port of the main service (when applicable)
+  #   appProtocol: ftps
 
 ui:
   ingress:
