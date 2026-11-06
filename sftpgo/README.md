@@ -112,6 +112,85 @@ services:
         port: 22
 ```
 
+### Additional ports
+
+Besides the built-in servers (`sftp`, `ftp`, `webdav`, `http`), the `ports` of `service` and of any entry
+under `services` accept other keys. Each key is the name of a service port with these options:
+
+- `port`: service port. Required, unless the key matches an `additionalPorts` entry (see below).
+- `targetPort`: container port, by name or number. Defaults to the key, which must match a named
+  container port: a built-in server, `telemetry`, an `additionalPorts` entry or a port of an extra
+  container (or of a sidecar init container, with `restartPolicy: Always`).
+- `nodePort`: node port, for `NodePort` and `LoadBalancer` services.
+- `appProtocol`: defaults to the `additionalPorts` entry with the same key, if any, or to the
+  application protocol of the targeted SFTPGo port.
+
+All the ports use the TCP protocol. Keys are service port names: lowercase letters, digits and hyphens. A key set to `null` is ignored,
+so a values file can remove a port defined by another one.
+
+The following example exposes SFTP on both port 22 and port 2200:
+
+```yaml
+services:
+  sftp-public:
+    type: LoadBalancer
+    ports:
+      sftp:
+        port: 22
+      sftp-alt:
+        port: 2200
+        targetPort: sftp
+```
+
+When SFTPGo listens on more ports, for example with additional bindings, declare them under
+`additionalPorts`. They are added to the container and to the main service, and additional services
+can expose them by listing their name: `port` defaults to the `additionalPorts` entry, `nodePort` is not
+inherited because node ports are allocated cluster-wide. The following example adds an FTP binding with implicit TLS
+on container port 2990 and exposes it on port 990:
+
+```yaml
+ftpd:
+  enabled: true
+
+env:
+  SFTPGO_FTPD__BINDINGS__1__PORT: "2990"
+  SFTPGO_FTPD__BINDINGS__1__TLS_MODE: "2" # requires a TLS certificate, configured as usual
+
+additionalPorts:
+  ftps:
+    containerPort: 2990
+    port: 990
+
+services:
+  ftps-public:
+    type: LoadBalancer
+    ftpPassive: true
+    ports:
+      ftps: {} # port 990, targetPort ftps
+```
+
+### FTP passive ports
+
+SFTPGo uses a single passive port range, shared by all the FTP bindings, set with `ftpd.passivePortRange`.
+The chart sets it with environment variables, which take precedence over `passive_port_range` in `config`.
+The server announces the port number to clients, so passive ports cannot be remapped: the chart exposes
+each port of the range with the same service and container port, and for `NodePort` services also as
+node port (the range must be within the node port range of the cluster). The default range (30050-30070)
+is within the default node port range. Node ports are allocated cluster-wide: only one `NodePort` service,
+across all the releases in the cluster, can expose the passive ports of a given range.
+
+The main service exposes the passive ports when the FTP server is enabled (set `service.ftpPassive: false`
+to disable this). Additional services expose them only when `ftpPassive: true` is set, even if they do not
+expose the `ftp` port, as in the FTPS example above.
+
+`service.ports.ftp.passiveRange` and `services.<name>.ports.ftp.passiveRange` are deprecated.
+The former is still honored if `ftpd.passivePortRange` has its default value, otherwise the two must match.
+The latter enables the passive ports of the additional service and must match the passive port range.
+See the [changelog](https://github.com/sftpgo/helm-chart/blob/main/CHANGELOG.md) for upgrade notes.
+
+Note that each passive port is a separate service port: some load balancer implementations limit
+the number of ports per service.
+
 ### Gateway API
 
 The chart can expose SFTPGo via [Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/) resources
@@ -211,7 +290,7 @@ gatewayApi:
           sectionName: sftp
 ```
 
-Note: for FTP, only the control port is routed. Passive data ports (`service.ports.ftp.passiveRange`)
+Note: for FTP, only the control port is routed. Passive data ports (`ftpd.passivePortRange`)
 require separate handling (typically a dedicated `LoadBalancer` Service) because Gateway API does
 not model port ranges.
 
@@ -219,7 +298,7 @@ not model port ranges.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| additionalPorts | object | `{}` | Additional ports to expose in the deployment and service. |
+| additionalPorts | object | `{}` | Additional ports of the SFTPGo container (e.g. for additional bindings), keyed by port name (max 15 characters). They are also exposed by the main service. See "Additional ports" in the README. |
 | affinity | object | `{}` | [Affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity) configuration. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#scheduling) for details. |
 | api.ingress.annotations | object | `{}` | Annotations to be added to the ingress. |
 | api.ingress.className | string | `""` | Ingress [class name](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class). |
@@ -236,6 +315,8 @@ not model port ranges.
 | envVars | list | `[]` | Additional environment variables passed directly to containers. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables) for details. |
 | extraContainers | list | `[]` | Additional [containers](https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers) to run in the same pod (e.g., sidecars). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#containers) for details. |
 | ftpd.enabled | bool | `false` | Enable FTP service. |
+| ftpd.passivePortRange.end | int | `30070` | FTP passive range end port. |
+| ftpd.passivePortRange.start | int | `30050` | FTP passive range start port. |
 | ftpd.port | int | `2021` | Container FTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting. |
 | fullnameOverride | string | `""` | A name to substitute for the full names of resources. |
 | gatewayApi | object | `{"httpRoutes":{"api":{"annotations":{},"backend":{},"enabled":false,"filters":[],"hostnames":[],"labels":{},"parentRefs":[],"pathPrefix":"/api"},"ui":{"annotations":{},"backend":{},"enabled":false,"filters":[],"hostnames":[],"labels":{},"parentRefs":[],"pathPrefix":"/"},"webdav":{"annotations":{},"backend":{},"enabled":false,"filters":[],"hostnames":[],"labels":{},"parentRefs":[],"pathPrefix":"/"}},"tcpRoutes":{"ftp":{"annotations":{},"backend":{},"enabled":false,"labels":{},"parentRefs":[]},"sftp":{"annotations":{},"backend":{},"enabled":false,"labels":{},"parentRefs":[]}}}` | [Gateway API](https://gateway-api.sigs.k8s.io/) routes configuration. HTTPRoute is part of the Gateway API standard channel (GA in v1). TCPRoute requires the standard channel CRDs v1.6 or later, or the experimental channel CRDs. See the README for compatibility details and path-prefix semantics. |
@@ -314,13 +395,13 @@ not model port ranges.
 | securityContext | object | `{}` | Container [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context-1) for details. |
 | service.annotations | object | `{}` | Annotations to be added to the service. |
 | service.externalTrafficPolicy | string | `nil` | Route external traffic to node-local or cluster-wide endoints. Useful for [preserving the client source IP](https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip). |
+| service.ftpPassive | bool | `true` | Expose the FTP passive ports when the FTP server is enabled. NodePort services use them as node ports. |
 | service.labels | object | `{}` | labels to be added to the service. |
 | service.loadBalancerClass | string | `nil` | Only applies when the service type is LoadBalancer. The [class](https://kubernetes.io/docs/concepts/services-networking/service/#load-balancer-class) of the load balancer implementation this service belongs to. Useful when multiple load balancer providers are available in the cluster. This field is immutable: changing it requires recreating the service. |
 | service.loadBalancerIP | string | `nil` | Only applies when the service type is LoadBalancer. Load balancer will get created with the IP specified in this field. |
 | service.loadBalancerSourceRanges | list | `[]` | If specified (and supported by the cloud provider), traffic through the load balancer will be restricted to the specified client IPs. Valid values are IP CIDR blocks. |
 | service.ports.ftp.nodePort | int | `nil` | FTP node port (when applicable). |
-| service.ports.ftp.passiveRange.end | int | `50020` | FTP passive range end port. |
-| service.ports.ftp.passiveRange.start | int | `50000` | FTP passive range start port. |
+| service.ports.ftp.passiveRange | object | `{}` | Deprecated: use `ftpd.passivePortRange`. |
 | service.ports.ftp.port | int | `21` | FTP service port. |
 | service.ports.http.nodePort | int | `nil` | REST API node port (when applicable). |
 | service.ports.http.port | int | `80` | REST API service port. |
@@ -334,7 +415,7 @@ not model port ranges.
 | serviceAccount.automountServiceAccountToken | bool | `true` | Automount API credentials for the Service Account. |
 | serviceAccount.create | bool | `true` | Enable service account creation. |
 | serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template. |
-| services | object | `{}` | Additional services exposing servers (SFTP, FTP, WebDAV, HTTP) individually. The schema matches the one under the `service` key. Additional services need at least one port. |
+| services | object | `{}` | Additional services exposing servers (SFTP, FTP, WebDAV, HTTP) individually. Same schema as `service`, but only the listed ports are exposed and `ftpPassive` defaults to false. |
 | sftpd.enabled | bool | `true` | Enable SFTP service. |
 | sftpd.port | int | `2022` | Container SFTP port. Set to 0 to disable the service. The 'enabled' flag may be removed in the future in favor of this setting. |
 | tolerations | list | `[]` | [Tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) for node taints. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#scheduling) for details. |

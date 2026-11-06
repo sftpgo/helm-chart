@@ -1,0 +1,10 @@
+# The default FTP passive port range must work with NodePort services.
+ftpd:
+  enabled: true
+
+service:
+  type: NodePort
+  ports:
+    ftp:
+      port: 21
+      nodePort: 30021

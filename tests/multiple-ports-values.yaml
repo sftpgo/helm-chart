@@ -1,0 +1,31 @@
+ftpd:
+  enabled: true
+  passivePortRange:
+    start: 50100
+    end: 50103
+
+env:
+  SFTPGO_FTPD__BINDINGS__1__PORT: "2990"
+
+additionalPorts:
+  ftp-alt:
+    containerPort: 2990
+    port: 990
+
+service:
+  ports:
+    sftp-alt:
+      port: 2200
+      targetPort: sftp
+
+services:
+  public:
+    type: ClusterIP
+    ftpPassive: true
+    ports:
+      sftp:
+        port: 22
+      sftp-alt:
+        port: 2200
+        targetPort: sftp
+      ftp-alt: {}
