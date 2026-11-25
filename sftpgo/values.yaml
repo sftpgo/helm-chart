@@ -106,8 +106,11 @@ serviceAccount:
   # -- Enable service account creation.
   create: true
 
-  # -- Automount API credentials for the Service Account.
-  automountServiceAccountToken: true
+  # -- Automount API credentials for the Service Account, and mount them into the pod.
+  # SFTPGo does not call the Kubernetes API, so the token is not mounted by default. Set it to true when a
+  # sidecar needs the pod's own token, for example a Vault Agent using Kubernetes auth.
+  # The pod setting also applies when `create` is false and an existing service account is used.
+  automountServiceAccountToken: false
 
   # -- Annotations to be added to the service account.
   annotations: {}
@@ -139,17 +142,29 @@ podTerminationGracePeriodSeconds: null
 
 # -- Pod [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod).
 # See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context) for details.
+# The defaults meet the [restricted Pod Security Standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted).
+# All SFTPGo images run as user and group 1000.
 podSecurityContext:
   fsGroup: 1000
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
 
 # -- Container [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container).
 # See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context-1) for details.
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
+# The defaults meet the restricted Pod Security Standard. To remove a default, set it to `null`;
+# an empty map (`{}`) is merged with the defaults by Helm and does not remove them.
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  # SFTPGo writes its generated host keys and its default SQLite database to its working directory,
+  # /var/lib/sftpgo, so a read-only root filesystem needs a writable volume there (`persistence.enabled`
+  # mounts one) and on every other path the configuration writes to.
   # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
 
 # -- Add [init containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) to the pod.
 initContainers: []

@@ -43,6 +43,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "sftpgo.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       hostNetwork: {{ .Values.hostNetwork }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
