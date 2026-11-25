@@ -161,9 +161,11 @@ securityContext:
   capabilities:
     drop:
       - ALL
-  # SFTPGo writes its generated host keys and its default SQLite database to its working directory,
-  # /var/lib/sftpgo, so a read-only root filesystem needs a writable volume there (`persistence.enabled`
-  # mounts one) and on every other path the configuration writes to.
+  # With the defaults, SFTPGo writes generated host keys and its SQLite database to its working directory,
+  # /var/lib/sftpgo (`persistence.enabled` mounts a volume there). With an external database (for example
+  # PostgreSQL, the usual production setup, through `config.data_provider`) and host keys mounted from a
+  # Secret (`config.sftpd.host_keys`), it writes nothing to the root filesystem and readOnlyRootFilesystem
+  # works. Users on the local filesystem backend still need a writable volume for their home directories.
   # readOnlyRootFilesystem: true
 
 # -- Add [init containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) to the pod.
